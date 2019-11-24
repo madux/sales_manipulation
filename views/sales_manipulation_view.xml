@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<odoo>
+
+       <data>
+
+             <record model="ir.ui.view" id="view_sale_commission_form">
+            <field name="name">sale.order.inherits</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+ 
+                <xpath expr="//field[@name='partner_id']" position="after">
+                           <field name="fake_field" invisible="1"/>
+                </xpath>
+                <xpath expr="//notebook//page[1]//field[@name='order_line']//price_unit" position="after">
+                            <field name="difference" invisible="0"/>
+                         
+                </xpath>
+
+            </field>
+        </record>
+        <record model="ir.ui.view" id="account_sales_fake_view2" >
+                <field name="name">account.payment</field>
+                <field name="model">account.payment</field>
+                <field name="inherit_id" ref="account.view_account_payment_form" />
+                <field name="arch" type="xml">
+
+                    <xpath expr="//field[@name='amount']" position="before">
+                              <field name="fake_field" invisible="1"/>
+                    </xpath>
+
+                </field>
+            
+        </record>
+
+        <record model="ir.ui.view" id="account_sales_invoice_fake" >
+                <field name="name">account.payment.invoice</field>
+                <field name="model">account.payment</field>
+                <field name="inherit_id" ref="account.view_account_payment_invoice_form" />
+                <field name="arch" type="xml">
+
+                    <xpath expr="//field[@name='journal_id']" position="after">
+                        <field name="fake_field" invisible="1"/>
+
+                    </xpath>
+
+                </field>
+            </record>
+
+
+        <record model="ir.ui.view" id="view_account_sale_fake_invoiceform">
+            <field name="name">sales.field.fake.form.inherit</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='partner_id']" position="after">
+                           <field name="fake_field" invisible="1"/>
+                           
+                </xpath>
+
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="res_partner_sales_commission" >
+            <field name="name">res.partner</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='lang']" position="after">
+                           <field name="is_agent" string="Is Agent" invisible="0"/>
+
+                </xpath> 
+            </field>
+        </record>
+ 
+    <record id="view_salefake_form_wizards" model="ir.ui.view">
+        <field name="model">sale_fake.wizards</field>
+        <field name="arch" type="xml">
+            <form string="Sales">
+                <sheet>
+                    <group colspan="20">
+                        <group>
+                            <field name="start"/>
+                            <field name="end"/>
+                            <field name="amount"/>
+                            
+                        </group>
+                        <group>
+                            <field name="percentage"/>
+                            <field name="run_type"/>
+                            <button name="trigger_preview_changes" string="Preview Changes" type="object" class="oe_highlight"/>
+                        </group>
+                     </group>
+                     <notebook colspan="4"> 
+                        <page name="mani_sales_order" string="Sale Orders">
+                            <field name="rental_line">
+                              <tree string="Sales Order" editable="bottom">
+                                <field name="name" required="1"/>
+                                <field name="partner_id" readonly="1"/>
+                                <field name="date_order" readonly="1"/>
+                                <field name="amount_total" readonly="1"/> 
+                              </tree>
+                            </field>
+                         </page>
+                    </notebook>
+                    <footer>
+                        <button name="confirm_faker" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fake_sales_wizard" model="ir.actions.act_window">
+        <field name="name">Create Sales</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale_fake.wizards</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field> 
+        <field name="target">new</field>
+        <field name="multi">True</field>
+    </record>
+ 
+
+
+
+      <menuitem id ="sales_faker" name="Sales Faker" sequence="8" action="action_fake_sales_wizard" web_icon="sales_commission_module,static/description/icon.png"/>
+          <menuitem id ="menu_sales_commission" name="Commission" parent="sales_commission_main_menu" sequence="1" groups="base.group_system,sales_commission_module.group_commission_manager"/>
+               <menuitem id ="menu_worksheet_menu" name="Worksheets" sequence="2" parent="menu_sales_commission" action="sales_commission_worksheet_actions"/>
+                <menuitem id ="menu_commission_approve" name="Approved Commissions" sequence="3" parent="menu_sales_commission" action="sales_commission_actions"/>
+                    <menuitem id ="menu_commission_creates" name="Generate Worksheet" sequence="1" parent="menu_sales_commission" action="action_commission_wizard"/>
+               
+          <menuitem id ="menu_sale_commission_config" name="Configuration" parent="sales_commission_main_menu" sequence="7" groups="base.group_system,sales_commission_module.group_commission_manager"/>
+              <menuitem id ="percentages_sale_commission" name="Set Percentage" sequence="1" parent="menu_sale_commission_config" action="sales_commission_percentage_actions"/>
+
+ </data>
+ </odoo>

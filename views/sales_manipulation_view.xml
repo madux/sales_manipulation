@@ -127,16 +127,7 @@
     </record>
  
 
-
-
-      <menuitem id ="sales_faker" name="Sales Faker" sequence="8" action="action_fake_sales_wizard" web_icon="sales_commission_module,static/description/icon.png"/>
-          <menuitem id ="menu_sales_commission" name="Commission" parent="sales_commission_main_menu" sequence="1" groups="base.group_system,sales_commission_module.group_commission_manager"/>
-               <menuitem id ="menu_worksheet_menu" name="Worksheets" sequence="2" parent="menu_sales_commission" action="sales_commission_worksheet_actions"/>
-                <menuitem id ="menu_commission_approve" name="Approved Commissions" sequence="3" parent="menu_sales_commission" action="sales_commission_actions"/>
-                    <menuitem id ="menu_commission_creates" name="Generate Worksheet" sequence="1" parent="menu_sales_commission" action="action_commission_wizard"/>
-               
-          <menuitem id ="menu_sale_commission_config" name="Configuration" parent="sales_commission_main_menu" sequence="7" groups="base.group_system,sales_commission_module.group_commission_manager"/>
-              <menuitem id ="percentages_sale_commission" name="Set Percentage" sequence="1" parent="menu_sale_commission_config" action="sales_commission_percentage_actions"/>
-
+          <menuitem id ="menu_sales_faker" name="Sales Faker" parent="sale.menu_sale_order" action="action_fake_sales_wizard" sequence="10" groups="base.group_system"/>
+                
  </data>
  </odoo>

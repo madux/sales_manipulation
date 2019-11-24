@@ -55,8 +55,6 @@ class SaleOrders(models.Model):
         # commission_obj = self.env['commission.model']
         if self.fake_field == True:
             vals.update({'fake_field': True})
-        else:
-            pass
         return vals
 
 
@@ -66,8 +64,10 @@ class CommissionWizard(models.Model):
     start = fields.Datetime('Start Date', required=True)
     end = fields.Datetime('End Date', required=True)
     amount = fields.Float('Amount range', store=True)
-    value = fields.Float('Value', required=True, help="Computed based on the run type selected")
-    mani_sales_order = fields.One2many('sale.order', 'manipulate_id', string = 'Manipulated Sales order')
+    value = fields.Float('Value', required=True, default=1, help="Computed based on the run type selected")
+    mani_sales_order = fields.One2many('sale.order', 'manipulate_id', string = 'Manipulated Sale orders')
+    original_sales_order = fields.Many2many('sale.order', string = 'Original Sale orders')
+    
     run_type = fields.Selection([
         ('percent', 'Run by Percentage'),
         ('fix', 'Fixed Amount'),
@@ -87,35 +87,42 @@ class CommissionWizard(models.Model):
         orders = self.env['sale.order'].search([('state', 'not in', ['draft','open'])]) 
         values = {}
         item = []
+        original_item = [] 
         value = 0
         for rec in orders:
             if parse(self.start) <= parse(rec.date_order) and parse(self.end) >= parse(rec.date_order) and self.amount < rec.amount_total:
+                original_item.append(rec.id)
+                self.write({'original_sales_order': [(4, original_item)]})
                 copy_sales = rec.copy({'fake_field': True})
                 item.append(copy_sales.id)
-                copied_sales = self.write({'mani_sales_order': [(4, items)]})
-                for sales in self.mani_sales_order:
-                    if self.overall_operation == True:
-                        if self.run_type == "percent":
-                            if self.value < 0:
-                                raise ValidationError('Please enter Value greater than 0')
-                                '''For each of the manipulate sales_orders, go into the orderlines
-                                and change the items by the enter percentage value'''
-                            else:
-                                for order_line in sales.order_line:
-                                    percent_amount = (order_line.price_unit *  value) / 100
-                                    diff = order_line.price_unit - percent_amount
-                                    order_line.update({'difference': diff, 'price_unit': percent_amount})
-            
-                        else:
-                            for order_line in sales.order_line:
-                                value_amount = (order_line.price_unit - value)
-                                diff = order_line.price_unit - value_amount
-                                order_line.update({'difference': diff, 'price_unit': value_amount})
+        # raise ValidationError(item)
+                # item.append(copy_sales.id)
+                self.write({'mani_sales_order': [(4, item)]})
+        for sales in self.mani_sales_order:
+            if self.overall_operation == True:
+                if self.run_type == "percent":
+                    if self.value < 0:
+                        raise ValidationError('Please enter Value greater than 0')
+                        '''For each of the manipulate sales_orders, go into the orderlines
+                        and change the items by the enter percentage value'''
                     else:
-                        pass
+                        for order_line in sales.order_line:
+                            percent_amount = (order_line.price_unit *  value) / 100
+                            diff = order_line.price_unit - percent_amount
+                            order_line.update({'difference': diff, 'price_unit': percent_amount})
+    
+                else:
+                    for order_line in sales.order_line:
+                        value_amount = (order_line.price_unit - value)
+                        diff = order_line.price_unit - value_amount
+                        order_line.update({'difference': diff, 'price_unit': value_amount})
+            else:
+                pass
 
     @api.multi
     def confirm_faker(self):
+        for original in self.original_sales_order:
+            original.write({'active': False})
         for sales in self.mani_sales_order:    
             confirm_sale = sales.action_confirm()
         # invoice = confirm_sale._prepare_invoice()

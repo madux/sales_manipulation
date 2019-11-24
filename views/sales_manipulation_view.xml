@@ -3,7 +3,7 @@
 
        <data>
 
-             <record model="ir.ui.view" id="view_sale_commission_form">
+             <record model="ir.ui.view" id="view_sale_fake_form">
             <field name="name">sale.order.inherits</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
@@ -12,10 +12,15 @@
                 <xpath expr="//field[@name='partner_id']" position="after">
                            <field name="fake_field" invisible="1"/>
                 </xpath>
-                <xpath expr="//notebook//page[1]//field[@name='order_line']//price_unit" position="after">
+                <xpath expr="//notebook//page[1]//field[@name='order_line']" position="inside">
                             <field name="difference" invisible="0"/>
                          
                 </xpath>
+
+                <!-- <xpath expr="//menuitem[@name='menu_sale_order']" position="attributes">
+                    <attribute name="groups">1</attribute>
+                   <attribute name="attrs">sales_manipulation.sales_fake_officer</attribute>  
+                </xpath> -->
 
             </field>
         </record>
@@ -63,19 +68,7 @@
         </record>
 
 
-        <record model="ir.ui.view" id="res_partner_sales_commission" >
-            <field name="name">res.partner</field>
-            <field name="model">res.partner</field>
-            <field name="inherit_id" ref="base.view_partner_form" />
-            <field name="arch" type="xml">
-
-                <xpath expr="//field[@name='lang']" position="after">
-                           <field name="is_agent" string="Is Agent" invisible="0"/>
-
-                </xpath> 
-            </field>
-        </record>
- 
+        
     <record id="view_salefake_form_wizards" model="ir.ui.view">
         <field name="model">sale_fake.wizards</field>
         <field name="arch" type="xml">
@@ -89,15 +82,25 @@
                             
                         </group>
                         <group>
-                            <field name="percentage"/>
+                            <field name="value" placeholder="eg. 5% Or 5000" required="1"/>
                             <field name="run_type"/>
                             <button name="trigger_preview_changes" string="Preview Changes" type="object" class="oe_highlight"/>
                         </group>
                      </group>
                      <notebook colspan="4"> 
-                        <page name="mani_sales_order" string="Sale Orders">
-                            <field name="rental_line">
-                              <tree string="Sales Order" editable="bottom">
+                        <page name="original_orders" string="Original Sale Orders">
+                            <field name="original_sales_order" readonly="1">
+                              <tree string="Original Sales Order">
+                                <field name="name" readonly="1"/>
+                                <field name="partner_id" readonly="1"/>
+                                <field name="date_order" readonly="1"/>
+                                <field name="amount_total" readonly="1"/> 
+                              </tree>
+                            </field>
+                            <separator string="Manipulate Sales Records" colspan="4"/>
+
+                            <field name="mani_sales_order">
+                              <tree string="Manipulated Sales Order" editable="bottom">
                                 <field name="name" required="1"/>
                                 <field name="partner_id" readonly="1"/>
                                 <field name="date_order" readonly="1"/>
@@ -105,6 +108,7 @@
                               </tree>
                             </field>
                          </page>
+                        
                     </notebook>
                     <footer>
                         <button name="confirm_faker" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
@@ -122,12 +126,45 @@
         <field name="res_model">sale_fake.wizards</field>
         <field name="view_type">form</field>
         <field name="view_mode">form</field> 
-        <field name="target">new</field>
+        <field name="target">current</field>
         <field name="multi">True</field>
     </record>
+    <menuitem id ="menu_sales_faker" name="Sales Faker" parent="sale.menu_sale_order" 
+        action="action_fake_sales_wizard" sequence="10" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+        
+
+    <!-- <record id="fake_action_orders" model="ir.actions.act_window">
+            <field name="name">Sales Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="search_view_id" ref="sale_order_view_search_inherit_sale"/>
+            <field name="context">{}</field>
+            <field name="domain">[('active', '=', True)]</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Create a Quotation, the first step of a new sale.
+                </p><p>
+                    Once the quotation is confirmed, it becomes a sales order.
+                    You'll be able to invoice it and collect payments.
+                    From the <i>Sales Orders</i> menu, you can track delivery
+                    orders or services.
+                </p>
+            </field>
+        </record> -->
+        
+        <!-- <menuitem action="sale.action_orders"
+            id="sale.menu_sale_order" name="Sales Orders" parent="sale.sales_team.menu_sales"
+            sequence="12" groups="sales_manipulation.sales_fake_officer, base.group_system"/>
+
+        <menuitem id ="fake_sales_menu" name="Sales Orders .." parent="sale.sales_team.menu_sales" action="fake_action_orders" 
+          sequence="13" groups="sales_manipulation.sales_fake_user"/> -->
+
+
  
 
-          <menuitem id ="menu_sales_faker" name="Sales Faker" parent="sale.menu_sale_order" action="action_fake_sales_wizard" sequence="10" groups="base.group_system"/>
-                
+
+            
  </data>
  </odoo>

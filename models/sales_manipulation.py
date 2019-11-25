@@ -66,7 +66,7 @@ class CommissionWizard(models.Model):
 
     start = fields.Datetime('Start Date', required=True)
     end = fields.Datetime('End Date', required=True)
-    amount = fields.Float('Amount range', store=True)
+    amount = fields.Float('Amount Above', store=True)
     value = fields.Float('Value', required=True, default=1, help="Computed based on the run type selected")
     mani_sales_order = fields.Many2many('sale.order', string = 'Manipulated Sale orders')
     original_sales_order = fields.Many2many('sale.order', string = 'Original Sale orders')
@@ -91,8 +91,7 @@ class CommissionWizard(models.Model):
             line_ids = []
             for lines in self.mani_sales_order:
                 for line in lines.order_line:
-                    line_ids.append(line.id)
-                    # line_ids = [rec.id for rec in lines.order_line]
+                    line_ids.append(line.id) 
                     self.mani_sales_order_line = [(6, 0, line_ids)]
 
     @api.one
@@ -109,16 +108,13 @@ class CommissionWizard(models.Model):
                 copy_sales = rec.copy({'state':'draft', 'fake_field': True})
                 item.append(copy_sales.id) 
                 self.write({'mani_sales_order': [(4, item)]})
-                
-         
-            
+
     @api.one
     def trigger_changes(self):
         percent_amount = 0 
         value = 0
         value_amount = 0
-         
-        for sales in self.mani_sales_order:
+        for order_line in self.mani_sales_order_line:
             if self.overall_operation == True:
                 if self.run_type == "percent":
                     if self.value < 0:
@@ -126,30 +122,35 @@ class CommissionWizard(models.Model):
                         '''For each of the manipulate sales_orders, go into the orderlines
                         and change the items by the enter percentage value'''
                     else:
-                        for order_line in sales.order_line:
-                            percent_amount = (order_line.price_unit *  self.value) / 100
-                            diff = order_line.price_unit - percent_amount
-                            order_line.update({'difference': diff, 'price_unit': percent_amount})
-    
-                else:
-                    for order_line in sales.order_line:
-                        value_amount = (order_line.price_unit - self.value)
-                        diff = order_line.price_unit - value_amount
-                        order_line.update({'difference': diff, 'price_unit': value_amount})
-            else:
-                pass
+                        # for order_line in sales.order_line:
+                        percent_amount = (order_line.price_unit *  self.value) / 100
+                        diff = order_line.price_unit - percent_amount
+                        order_line.update({'difference': diff, 'price_unit': percent_amount})
+                # else:
+                #     for order_line in sales.order_line:
+                #         value_amount = (order_line.price_unit - self.value)
+                #         diff = order_line.price_unit - value_amount
+                #         order_line.update({'difference': diff, 'price_unit': value_amount}) 
+            # else:
+            #     return self.confirm_faker()   
 
     @api.multi
     def confirm_faker(self):
         for original in self.original_sales_order:
+            '''Disable the original sales order
+               record by setting it to false'''
+      
             original.write({'active': False})
         for sales in self.mani_sales_order:    
             confirm_sale = sales.action_confirm()
-        # invoice = confirm_sale._prepare_invoice()
+            # invoice = confirm_sale._prepare_invoice()
             invoice_id = confirm_sale.action_invoice_create()
             find_invoice_id = self.env['account.invoice'].search([('id','=',invoice_id)])
             find_invoice_id.update({'fake_field': True}) 
-            '''Next thing is to register the payment to the respective journals, 
+            
+            '''Code to push to Journal and payment follows up: 
+            
+            Next thing is to register the payment to the respective journals, 
             so there is need to add an optional Journal field on the wizard. 
             If not, used the Journal type - SALE'''
                  

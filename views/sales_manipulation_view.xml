@@ -84,7 +84,7 @@
                         </group>
                         <group>
                             
-                            <field name="run_type"/>
+                            <field name="run_type" readonly="1"/>
                             <field name="value" placeholder="eg. 5% Or 5000" required="1"/>
                             <field name="overall_operation"/>
                             <button name="trigger_preview_changes" string="Preview Changes" type="object" class="oe_highlight"/>

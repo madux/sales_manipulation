@@ -42,19 +42,10 @@ class SaleOrders(models.Model):
     active = fields.Boolean('Active', default=True)
     
     manipulate_id = fields.Many2one('sale_fake.wizards', string= 'Manipulated ref')
-    # update_amount = fields.Float('Update Amount(%)') 
-    # difference_amount = fields.Float('Price Difference', compute="Get_difference", store=True)
-
-    # @api.depends('update_amount')
-    # def Get_difference(self):
-    #     if self.update_amount:
-    #         diff = self.amount_total - self.update_amount
-    #         self.difference_amount = diff
-    
+     
     @api.multi
     def _prepare_invoice(self):
-        vals = super(SaleOrders, self)._prepare_invoice()
-        # commission_obj = self.env['commission.model']
+        vals = super(SaleOrders, self)._prepare_invoice() 
         if self.fake_field == True:
             vals.update({'fake_field': True})
         return vals
@@ -67,10 +58,13 @@ class CommissionWizard(models.Model):
     start = fields.Datetime('Start Date', required=True)
     end = fields.Datetime('End Date', required=True)
     amount = fields.Float('Amount Above', store=True)
-    value = fields.Float('Value', required=True, default=1, help="Computed based on the run type selected")
-    mani_sales_order = fields.Many2many('sale.order', string = 'Manipulated Sale orders')
+    value = fields.Float('Value', required=True, 
+                         default=1, help="Computed based on the run type selected")
+    mani_sales_order = fields.Many2many('sale.order', 
+                                        string = 'Manipulated Sale orders')
     original_sales_order = fields.Many2many('sale.order', string = 'Original Sale orders')
-    mani_sales_order_line = fields.One2many('sale.order.line', string = 'Order Lines', compute="get_sale_orderlines")
+    mani_sales_order_line = fields.One2many('sale.order.line', string = 'Order Lines', 
+                                            compute="get_sale_orderlines")
     
     run_type = fields.Selection([
         ('percent', 'Run by Percentage'),
@@ -85,7 +79,7 @@ class CommissionWizard(models.Model):
     '''If the user checks overall trigger, it will run based on the percent or fixed amount:
      This will affect the price_unit of each sale order lines'''
      
-    @api.depends('mani_sales_order')
+    @api.onchange('mani_sales_order')
     def get_sale_orderlines(self):
         if self.mani_sales_order:
             line_ids = []
@@ -125,7 +119,7 @@ class CommissionWizard(models.Model):
                         # for order_line in sales.order_line:
                         percent_amount = (order_line.price_unit *  self.value) / 100
                         diff = order_line.price_unit - percent_amount
-                        order_line.update({'difference': diff, 'price_unit': percent_amount})
+                        order_line.update({'difference': diff, 'price_unit': diff})
                 # else:
                 #     for order_line in sales.order_line:
                 #         value_amount = (order_line.price_unit - self.value)
@@ -136,17 +130,17 @@ class CommissionWizard(models.Model):
 
     @api.multi
     def confirm_faker(self):
-        for original in self.original_sales_order:
-            '''Disable the original sales order
-               record by setting it to false'''
-      
-            original.write({'active': False})
         for sales in self.mani_sales_order:    
             confirm_sale = sales.action_confirm()
             # invoice = confirm_sale._prepare_invoice()
             invoice_id = confirm_sale.action_invoice_create()
             find_invoice_id = self.env['account.invoice'].search([('id','=',invoice_id)])
             find_invoice_id.update({'fake_field': True}) 
+        for original in self.original_sales_order:
+            '''Disable the original sales order
+               record by setting it to false'''
+
+            original.write({'active': False})
             
             '''Code to push to Journal and payment follows up: 
             

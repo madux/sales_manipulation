@@ -39,6 +39,8 @@ class SaleOrders(models.Model):
     _inherit = "sale.order"
     
     fake_field = fields.Boolean('Apply Fake', default=False)
+    active = fields.Boolean('Active', default=True)
+    
     manipulate_id = fields.Many2one('sale_fake.wizards', string= 'Manipulated ref')
     # update_amount = fields.Float('Update Amount(%)') 
     # difference_amount = fields.Float('Price Difference', compute="Get_difference", store=True)
@@ -60,12 +62,13 @@ class SaleOrders(models.Model):
 
 class CommissionWizard(models.Model):
     _name ="sale_fake.wizards"
+    _rec_name = "id"
 
     start = fields.Datetime('Start Date', required=True)
     end = fields.Datetime('End Date', required=True)
     amount = fields.Float('Amount range', store=True)
     value = fields.Float('Value', required=True, default=1, help="Computed based on the run type selected")
-    mani_sales_order = fields.One2many('sale.order', 'manipulate_id', string = 'Manipulated Sale orders')
+    mani_sales_order = fields.Many2many('sale.order', string = 'Manipulated Sale orders')
     original_sales_order = fields.Many2many('sale.order', string = 'Original Sale orders')
     
     run_type = fields.Selection([
@@ -82,10 +85,8 @@ class CommissionWizard(models.Model):
      This will affect the price_unit of each sale order lines'''
 
     @api.one
-    def trigger_preview_changes(self):
-        percent_amount = 0
-        orders = self.env['sale.order'].search([('state', 'not in', ['draft','open'])]) 
-        values = {}
+    def preview_changes(self): 
+        orders = self.env['sale.order'].search([('state', 'not in', ['draft','open'])])  
         item = []
         original_item = [] 
         value = 0
@@ -93,11 +94,17 @@ class CommissionWizard(models.Model):
             if parse(self.start) <= parse(rec.date_order) and parse(self.end) >= parse(rec.date_order) and self.amount < rec.amount_total:
                 original_item.append(rec.id)
                 self.write({'original_sales_order': [(4, original_item)]})
-                copy_sales = rec.copy({'fake_field': True})
-                item.append(copy_sales.id)
-        # raise ValidationError(item)
-                # item.append(copy_sales.id)
+                copy_sales = rec.copy({'state':'draft', 'fake_field': True})
+                item.append(copy_sales.id) 
                 self.write({'mani_sales_order': [(4, item)]})
+         
+            
+    @api.one
+    def trigger_changes(self):
+        percent_amount = 0 
+        value = 0
+        value_amount = 0
+         
         for sales in self.mani_sales_order:
             if self.overall_operation == True:
                 if self.run_type == "percent":
@@ -149,27 +156,4 @@ class AccountInvoiceFake(models.Model):
                  
                  
                  
-                 
-    
-    
-    
-    @api.multi
-    def confirm_sales(self):
-        orders = self.env['commission.model'].search([('state', 'in', ['draft','open'])]) #('order_date','>=', self.date_from),('checkout_date','<=',docs.date_to)])
-        commission_worksheet = self.env['commission.worksheet']
-        values = {}
-        item = []
-        for rec in orders:
-            if parse(self.start) <= parse(rec.order_date) and parse(self.end) >= parse(rec.order_date): 
-                start_date = self.start #rec[0].order_date
-                end_date = self.end #rec[-1].order_date 
-                item.append(rec.id) 
-                values = {'order_date': fields.Datetime.now(),
-                        'start_date':start_date,
-                        'end_date': end_date,
-                        'state':'account',
-                        'commission_line': [(6,0,item)], # rec.ids
-                        }
-            # else:
-            #     raise ValidationError('There are no records within the date range to create')
-        commission_worksheet.create(values) 
+                  

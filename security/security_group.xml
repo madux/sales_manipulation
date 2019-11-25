@@ -3,7 +3,7 @@
 <odoo>
     <data>
         <record model="ir.module.category" id="category_fake_sales_group">
-           <field name="name">Main Sales Faker</field>
+           <field name="name">Main Sales</field>
            <field name="description">Sales Faker</field>
            <field name="sequence">33</field>
         </record>

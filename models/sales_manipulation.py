@@ -70,6 +70,7 @@ class CommissionWizard(models.Model):
     value = fields.Float('Value', required=True, default=1, help="Computed based on the run type selected")
     mani_sales_order = fields.Many2many('sale.order', string = 'Manipulated Sale orders')
     original_sales_order = fields.Many2many('sale.order', string = 'Original Sale orders')
+    mani_sales_order_line = fields.One2many('sale.order.line', string = 'Order Lines', compute="get_sale_orderlines")
     
     run_type = fields.Selection([
         ('percent', 'Run by Percentage'),
@@ -77,26 +78,38 @@ class CommissionWizard(models.Model):
         ], string='Run Type', readonly=False, copy=False, 
                                 index=True, 
                                 track_visibility='onchange', 
-                                default='fix')
+                                default='percent')
 
     overall_operation = fields.Boolean('Overall Trigger', default=True)
 
     '''If the user checks overall trigger, it will run based on the percent or fixed amount:
      This will affect the price_unit of each sale order lines'''
+     
+    @api.depends('mani_sales_order')
+    def get_sale_orderlines(self):
+        if self.mani_sales_order:
+            line_ids = []
+            for lines in self.mani_sales_order:
+                for line in lines.order_line:
+                    line_ids.append(line.id)
+                    # line_ids = [rec.id for rec in lines.order_line]
+                    self.mani_sales_order_line = [(6, 0, line_ids)]
 
     @api.one
-    def preview_changes(self): 
+    def trigger_preview_changes(self): 
         orders = self.env['sale.order'].search([('state', 'not in', ['draft','open'])])  
         item = []
         original_item = [] 
         value = 0
         for rec in orders:
             if parse(self.start) <= parse(rec.date_order) and parse(self.end) >= parse(rec.date_order) and self.amount < rec.amount_total:
+                
                 original_item.append(rec.id)
                 self.write({'original_sales_order': [(4, original_item)]})
                 copy_sales = rec.copy({'state':'draft', 'fake_field': True})
                 item.append(copy_sales.id) 
                 self.write({'mani_sales_order': [(4, item)]})
+                
          
             
     @api.one
@@ -114,13 +127,13 @@ class CommissionWizard(models.Model):
                         and change the items by the enter percentage value'''
                     else:
                         for order_line in sales.order_line:
-                            percent_amount = (order_line.price_unit *  value) / 100
+                            percent_amount = (order_line.price_unit *  self.value) / 100
                             diff = order_line.price_unit - percent_amount
                             order_line.update({'difference': diff, 'price_unit': percent_amount})
     
                 else:
                     for order_line in sales.order_line:
-                        value_amount = (order_line.price_unit - value)
+                        value_amount = (order_line.price_unit - self.value)
                         diff = order_line.price_unit - value_amount
                         order_line.update({'difference': diff, 'price_unit': value_amount})
             else:

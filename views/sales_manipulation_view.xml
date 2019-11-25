@@ -83,8 +83,9 @@
                             
                         </group>
                         <group>
-                            <field name="value" placeholder="eg. 5% Or 5000" required="1"/>
+                            
                             <field name="run_type"/>
+                            <field name="value" placeholder="eg. 5% Or 5000" required="1"/>
                             <field name="overall_operation"/>
                             <button name="trigger_preview_changes" string="Preview Changes" type="object" class="oe_highlight"/>
                             <button name="trigger_changes" string="Trigger` Changes" type="object" class="oe_highlight"/>
@@ -110,15 +111,25 @@
                                 <field name="amount_total" readonly="1"/> 
                               </tree>
                             </field>
+                            <separator string="Sales Order Lines Records" colspan="4"/>
+                            <field name="mani_sales_order_line" readonly="0">
+                              <tree string="Sales Order Lines" editable="bottom" >
+                                    <field name="product_id" readonly="1"/> 
+                                    <field name="name" readonly="1"/>
+                                    <field name="product_uom_qty"
+                                        string="Ordered Qty"/> 
+                                    <!-- <field name="product_uom"
+                                        attrs="{'readonly': [('state', 'in', ('sale','done', 'cancel'))]}"
+                                        context="{'company_id': parent.company_id}"
+                                        groups="product.group_uom" options='{"no_open": True}'/> -->
+                                    <field name="price_unit" readonly="0"/>
+                                    <field name="tax_id" widget="many2many_tags" domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]" />
+                                    <!-- <field name="price_subtotal" widget="monetary"/> -->
+                                    <field name="price_total" widget="monetary"/>
+                                     
+                                </tree>
+                            </field>
 
-                            <!-- <field name="mani_sales_order" widget="one2many_list">
-                              <tree string="Manipulated Sales Order" editable="bottom">
-                                <field name="name" required="1"/>
-                                <field name="partner_id" readonly="1"/>
-                                <field name="date_order" readonly="1"/>
-                                <field name="amount_total" readonly="1"/> 
-                              </tree>
-                            </field> -->
                          </page>
                         
                     </notebook>

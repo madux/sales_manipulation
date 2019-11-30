@@ -25,6 +25,8 @@ from odoo.tools.misc import formatLang
 from odoo.addons.base.res.res_partner import WARNING_MESSAGE, WARNING_HELP
 import odoo.addons.decimal_precision as dp
 from dateutil.parser import parse
+from collections import Counter
+sales_lister = []
 
 
 class SaleOrdersLine(models.Model):
@@ -78,16 +80,26 @@ class CommissionWizard(models.Model):
      This will affect the price_unit of each sale order lines"""
 
     @api.one
-    def trigger_preview_changes(self): 
-        orders = self.env['sale.order'].search([('state', 'not in', ['draft','open'])])  
-        item = []
-        original_item = [] 
-        value = 0
+    def trigger_preview_changes(self):
+        g = []
+        orders = self.env['sale.order'].search(['&', ('state', '=', 'sale'), ('fake_field', '=', False)])
         for rec in orders:
-            if parse(self.start) <= parse(rec.date_order) and parse(self.end) >= parse(rec.date_order) and self.amount < rec.amount_total:
-                original_item.append(rec.id)
-                self.write({'original_sales_order': [(4, original_item)]})
+            if (parse(self.start) <= parse(rec.date_order)) and (parse(self.end) >= parse(rec.date_order)) and (self.amount < rec.amount_total):
+                g.append(rec.id)
+                sales_lister = g #.append(rec.id)
+        self.write({'original_sales_order': [(4, g)]})
         self.create_fake_sales()
+        # raise ValidationError(type(sales_lister))
+            
+            
+        # item = []
+        # original_item = [] 
+        # value = 0
+        # for rec in orders:
+        #     if parse(self.start) <= parse(rec.date_order) and parse(self.end) >= parse(rec.date_order) and self.amount < rec.amount_total:
+        #         original_item.append(rec.id)
+        #         self.write({'original_sales_order': [(4, original_item)]})
+        # self.create_fake_sales()
                 # copy_sales = rec.copy({'state':'draft', 'fake_field': True})
                 # item.append(copy_sales.id)
                 # self.write({'mani_sales_order': [(4, item)]})
@@ -103,12 +115,11 @@ class CommissionWizard(models.Model):
                 sales_id = sales_obj.create({
                                             'partner_id': sale.partner_id.id,
                                             'date_order': sale.date_order,
-                                            'payment': sale.payment_term_id.id,
+                                            'payment_term_id': sale.payment_term_id.id,
                                             'fake_field': True,
                                             'branch_id' : self.env.user.branch_id.id
                                             })
-                sale.write({'active': False})
-                self.sale_ordes = [(6, 0, [sales_id.id])]
+                # self.sale_ordes = [(6, 0, [sales_id.id])]
                 
                 for s_line in sale.order_line:
                     line_values['product_id'] = s_line.product_id.id
@@ -119,7 +130,7 @@ class CommissionWizard(models.Model):
                     line_values['order_id'] = sales_id.id
                     sol = sales_line.create(line_values)
                     line_ids.append(sol.id) 
-                    self.sales_fake_line = [(6, 0, line_ids)]
+            self.sales_fake_line = [(6, 0, line_ids)]
 
     @api.one
     def trigger_changes(self):
@@ -175,17 +186,25 @@ class CommissionWizard(models.Model):
 
     @api.multi
     def confirm_faker(self):
+        sale = []
         journal = self.env['account.journal'].search([('type', 'in', ['sale'])], limit=1)
-        if self.sale_ordes:
-            for each in self.sale_ordes:
-                sale_name = str(each.name)
-                partner = each.partner_id.id
-                date = each.date_order
-                narration = "SM"
-                amount = each.amount_total
-                '''each sales append the order_id, pick the total amount and create move'''
-                self.Account_Move(sale_name, journal, date, narration, partner, amount)
+        # item = sale.append(x.order_id.id for x in self.sales_fake_line)
+        for rec in self.sales_fake_line:
+            sale.append(rec.order_id.id)
+        
+        # print([item for item, count in collections.Counter(a).items() if count > 1])
 
+        sorted_item = [it for it, count in Counter(sale).items() if count > 1]
+        for each in sorted_item:
+            sale_order = self.env['sale.order'].browse([each])
+            sale_name = str(sale_order.name)
+            partner = sale_order.partner_id.id
+            date = sale_order.date_order
+            narration = "SM"
+            amount = sale_order.amount_total
+            '''each sales append the order_id, pick the total amount and create move'''
+            self.Account_Move(sale_name, journal, date, narration, partner, amount)
+        
 
 class AcocuntPaymentFake(models.Model):
     _inherit = "account.payment"

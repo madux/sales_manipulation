@@ -88,14 +88,12 @@
                             <field name="value" string="Percentage value" placeholder="eg. 5%" required="1"/>
                             <field name="overall_operation"/>
                             <field name="sale_ordes" widget="many2many_tags"/>
-
-                            
                             <button name="trigger_preview_changes" string="Preview Changes" type="object" class="oe_highlight"/>
                             <button name="trigger_changes" string="Decrease` Sales Price" type="object" class="oe_highlight"/>                   
                         </group>
                      </group>
                      <notebook colspan="4"> 
-                        <page name="original_orders" string="Original Sale Orders">
+                        <page name="original_orders" domain="[('active', '=', False)]" string="Original Sale Orders">
                             <field name="original_sales_order" readonly="0">
                               <tree string="Original Sales Order">
                                 <field name="name" readonly="1"/>
@@ -168,5 +166,5 @@
 
             <menuitem id ="fake_sales_menu" name="Sales Orders .." parent="sale.sales_team.menu_sales" action="fake_action_orders" 
             sequence="13" groups="sales_manipulation.sales_fake_user"/> --> 
- </data>
+    </data>
  </odoo>

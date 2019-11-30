@@ -10,32 +10,40 @@
             <field name="arch" type="xml">
  
                 <xpath expr="//field[@name='partner_id']" position="after">
-                           <field name="fake_field" invisible="0"/>
+                           <field name="fake_field" invisible="0" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                 </xpath>
                 <xpath expr="//notebook//page[1]//field[@name='order_line']" position="inside">
                             <field name="difference" invisible="0"/>
                          
                 </xpath>
-
-                <!-- <xpath expr="//menuitem[@name='menu_sale_order']" position="attributes">
-                    <attribute name="groups">1</attribute>
-                   <attribute name="attrs">sales_manipulation.sales_fake_officer</attribute>  
+                <!-- <xpath expr="//button[@name='action_confirm']" position="attributes">
+                           <attribute name="attrs">{'invisible':[('fake_field','=', True)]}</attribute>
                 </xpath> -->
 
             </field>
         </record>
+
+        <record model="ir.ui.view" id="fake_account_move_inherited_form" >
+            <field name="name">Account Move Inherited</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_id']" position="after">
+                           <field name="fake_field" invisible="0"/>
+                </xpath>
+                
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="account_sales_fake_view2" >
                 <field name="name">account.payment</field>
                 <field name="model">account.payment</field>
                 <field name="inherit_id" ref="account.view_account_payment_form" />
                 <field name="arch" type="xml">
-
                     <xpath expr="//field[@name='amount']" position="before">
-                              <field name="fake_field" invisible="1"/>
+                              <field name="fake_field" invisible="1" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                     </xpath>
-
                 </field>
-            
         </record>
 
         <record model="ir.ui.view" id="account_sales_invoice_fake" >
@@ -45,13 +53,10 @@
                 <field name="arch" type="xml">
 
                     <xpath expr="//field[@name='journal_id']" position="after">
-                        <field name="fake_field" invisible="1"/>
-
+                        <field name="fake_field" invisible="1" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                     </xpath>
-
                 </field>
             </record>
-
 
         <record model="ir.ui.view" id="view_account_sale_fake_invoiceform">
             <field name="name">sales.field.fake.form.inherit</field>
@@ -60,14 +65,11 @@
             <field name="arch" type="xml">
 
                 <xpath expr="//field[@name='partner_id']" position="after">
-                           <field name="fake_field" invisible="1"/>
+                           <field name="fake_field" invisible="1" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                            
                 </xpath>
-
             </field>
         </record>
-
-
         
     <record id="view_salefake_form_wizards" model="ir.ui.view">
         <field name="model">sale_fake.wizards</field>
@@ -79,21 +81,19 @@
                         <group>
                             <field name="start"/>
                             <field name="end"/>
-                            <field name="amount"/>
-                            
+                            <field name="amount"/>                   
                         </group>
-                        <group>
-                            
-                            <field name="run_type"/>
-                            <field name="value" placeholder="eg. 5% Or 5000" required="1"/>
+                        <group>                  
+                            <field name="run_type" readonly="1"/>
+                            <field name="value" string="Percentage value" placeholder="eg. 5%" required="1"/>
                             <field name="overall_operation"/>
+                            <field name="sale_ordes" widget="many2many_tags"/>
                             <button name="trigger_preview_changes" string="Preview Changes" type="object" class="oe_highlight"/>
-                            <button name="trigger_changes" string="Trigger` Changes" type="object" class="oe_highlight"/>
-                            
+                            <button name="trigger_changes" string="Decrease` Sales Price" type="object" class="oe_highlight"/>                   
                         </group>
                      </group>
                      <notebook colspan="4"> 
-                        <page name="original_orders" string="Original Sale Orders">
+                        <page name="original_orders" domain="[('active', '=', False)]" string="Original Sale Orders">
                             <field name="original_sales_order" readonly="0">
                               <tree string="Original Sales Order">
                                 <field name="name" readonly="1"/>
@@ -103,35 +103,18 @@
                               </tree>
                             </field>
                             <separator string="Manipulate Sales Records" colspan="4"/>
-                            <field name="mani_sales_order" readonly="0">
-                              <tree string="Manipulate Sales Order">
+                            <field name="sales_fake_line" readonly="0">
+                              <tree string="Manipulated Sales Order" editable="bottom">
+                                <field name="order_id" readonly="1"/>
+                                <field name="product_id" readonly="1"/>
                                 <field name="name" readonly="1"/>
-                                <field name="partner_id" readonly="1"/>
-                                <field name="date_order" readonly="1"/>
-                                <field name="amount_total" readonly="1"/> 
+                                 <field name="product_uom_qty" readonly="0"/>
+                                 <field name="tax_id" readonly="0" widget="many2many_tags"/>
+                                <field name="price_unit" readonly="0"/>
+                                <field name="price_total" readonly="1"/> 
                               </tree>
                             </field>
-                            <separator string="Sales Order Lines Records" colspan="4"/>
-                            <field name="mani_sales_order_line" readonly="0">
-                              <tree string="Sales Order Lines" editable="bottom" >
-                                    <field name="product_id" readonly="1"/> 
-                                    <field name="name" readonly="1"/>
-                                    <field name="product_uom_qty"
-                                        string="Ordered Qty"/> 
-                                    <!-- <field name="product_uom"
-                                        attrs="{'readonly': [('state', 'in', ('sale','done', 'cancel'))]}"
-                                        context="{'company_id': parent.company_id}"
-                                        groups="product.group_uom" options='{"no_open": True}'/> -->
-                                    <field name="price_unit" readonly="0"/>
-                                    <field name="tax_id" widget="many2many_tags" domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]" />
-                                    <!-- <field name="price_subtotal" widget="monetary"/> -->
-                                    <field name="price_total" widget="monetary"/>
-                                     
-                                </tree>
-                            </field>
-
                          </page>
-                        
                     </notebook>
                     <footer>
                         <button name="confirm_faker" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
@@ -181,13 +164,7 @@
             id="sale.menu_sale_order" name="Sales Orders" parent="sale.sales_team.menu_sales"
             sequence="12" groups="sales_manipulation.sales_fake_officer, base.group_system"/>
 
-        <menuitem id ="fake_sales_menu" name="Sales Orders .." parent="sale.sales_team.menu_sales" action="fake_action_orders" 
-          sequence="13" groups="sales_manipulation.sales_fake_user"/> -->
-
-
- 
-
-
-            
- </data>
+            <menuitem id ="fake_sales_menu" name="Sales Orders .." parent="sale.sales_team.menu_sales" action="fake_action_orders" 
+            sequence="13" groups="sales_manipulation.sales_fake_user"/> --> 
+    </data>
  </odoo>

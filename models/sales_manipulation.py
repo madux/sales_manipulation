@@ -85,12 +85,9 @@ class CommissionWizard(models.Model):
         orders = self.env['sale.order'].search(['&', ('state', '=', 'sale'), ('fake_field', '=', False)])
         for rec in orders:
             if (parse(self.start) <= parse(rec.date_order)) and (parse(self.end) >= parse(rec.date_order)) and (self.amount < rec.amount_total):
-                g.append(rec.id)
-                sales_lister = g #.append(rec.id)
-        self.write({'original_sales_order': [(4, g)]})
-        self.create_fake_sales()
-        # raise ValidationError(type(sales_lister))
-            
+                g.append(rec.id) 
+                self.write({'original_sales_order': [(4, g)]})
+                self.create_fake_sales() 
             
         # item = []
         # original_item = [] 

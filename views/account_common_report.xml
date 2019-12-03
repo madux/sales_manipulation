@@ -5,6 +5,7 @@
             <field name="name">Account Common report Inherited</field>
             <field name="model">account.common.report</field>
             <field name="inherit_id" ref="account.account_common_report_view" />
+            <field name="priority" eval="1"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='company_id']" position="replace">
                            <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/>

@@ -10,7 +10,7 @@
             <field name="arch" type="xml">
  
                 <xpath expr="//field[@name='partner_id']" position="after">
-                           <field name="fake_field" invisible="0" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+                           <field name="fake_field" invisible="0" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                 </xpath>
                 <xpath expr="//notebook//page[1]//field[@name='order_line']" position="inside">
                             <field name="difference" invisible="0"/>
@@ -29,7 +29,18 @@
             <field name="inherit_id" ref="account.view_move_form" />
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='company_id']" position="after">
-                           <field name="fake_field" invisible="0"/>
+                           <field name="fake_field" string="Apply Restrict" invisible="0" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+                </xpath>
+                
+            </field>
+        </record>
+        <record model="ir.ui.view" id="fake_account_journal_inherited_form" >
+            <field name="name">Account Journal Inherited</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_id']" position="after">
+                           <field name="fake_field" string="Apply Restrict" invisible="0" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                 </xpath>
                 
             </field>
@@ -41,7 +52,7 @@
                 <field name="inherit_id" ref="account.view_account_payment_form" />
                 <field name="arch" type="xml">
                     <xpath expr="//field[@name='amount']" position="before">
-                              <field name="fake_field" invisible="1" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+                              <field name="fake_field" invisible="1" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                     </xpath>
                 </field>
         </record>
@@ -53,7 +64,7 @@
                 <field name="arch" type="xml">
 
                     <xpath expr="//field[@name='journal_id']" position="after">
-                        <field name="fake_field" invisible="1" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+                        <field name="fake_field" invisible="1" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                     </xpath>
                 </field>
             </record>
@@ -65,7 +76,7 @@
             <field name="arch" type="xml">
 
                 <xpath expr="//field[@name='partner_id']" position="after">
-                           <field name="fake_field" invisible="1" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+                           <field name="fake_field" invisible="1" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                            
                 </xpath>
             </field>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<odoo> 
+       <data> 
+        <record model="ir.ui.view" id="fake_account_report_commoninherited_form" >
+            <field name="name">Account Common report Inherited</field>
+            <field name="model">account.common.report</field>
+            <field name="inherit_id" ref="account.account_common_report_view" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_id']" position="replace">
+                           <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/>
+                </xpath>
+                 <xpath expr="//field[@name='target_move']" position="replace">
+                    <field name="target_move" widget="selection" groups="sales_manipulation.sales_fake_officer"/>
+                </xpath>
+                <xpath expr="//field[@name='target_move']" position="after">
+                           <field name="fake_field" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer" options="{'no_create': True}"/>
+                </xpath>
+                
+            </field>
+        </record> 
+    </data>
+ </odoo>

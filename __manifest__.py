@@ -12,12 +12,14 @@
     'data': [
         'security/security_group.xml', 
         'views/sales_manipulation_view.xml',
+        'views/account_common_report.xml',
         'security/ir.model.access.csv',
     ],
     # 'qweb': [
     #     'static/src/xml/base.xml',
     # ],
     'price': 1000.00,
+    'sequence': 2,
     'currency': 'EUR',
     'installable': True,
     'auto_install': False,

@@ -187,7 +187,7 @@ class CommissionWizard(models.Model):
     @api.multi
     def confirm_faker(self):
         sale = []
-        journal = self.env['account.journal'].search([('type', 'in', ['sale'])], limit=1)
+        journal = self.env['account.journal'].search([('type', 'in', ['sale']), ('fake_field', '=', True)], limit=1)
         # item = sale.append(x.order_id.id for x in self.sales_fake_line)
         for rec in self.sales_fake_line:
             sale.append(rec.order_id.id)
@@ -218,6 +218,12 @@ class AccountMove(models.Model):
     fake_field = fields.Boolean('Apply Fake', default=False)
 
 
+class AccountJournal(models.Model):
+    _inherit = "account.journal"
+
+    fake_field = fields.Boolean('Apply Fake', default=False)
+
+
 class AccountInvoiceFake(models.Model):
     _inherit = "account.invoice"
 
@@ -227,3 +233,35 @@ class AccountInvoiceFake(models.Model):
     Format for account transaction
         incoming 500 ==> original 500 + (incoming 500 - incoming500) = 500
     """
+
+
+class AccountCommonReport(models.TransientModel):
+    _inherit = "account.common.report"
+
+    fake_field = fields.Boolean('Apply Restrict', default=True)
+    journal_ids = fields.Many2many('account.journal', string='Journals', required=True, 
+                                   default=lambda self: self.env['account.journal'].search([('fake_field', '=', True)])\
+                                        if self.fake_field == True else self.env['account.journal'].search([]))
+    target_move = fields.Selection([('posted', 'Entries'),
+                                    ('all', 'All Entries'),
+                                    ('draft', 'All Posted'),
+                                    ], string='Target Moves', required=True, default='draft')
+
+    def _build_contexts(self, data):
+        result = super(AccountCommonReport, self)._build_contexts(data)
+        data = {}
+        data['form'] = self.read(['fake_field'])[0]
+        result['fake_field'] = 'fake_field' in data['form'] and data['form']['fake_field'] or False
+        return result
+ 
+    @api.multi
+    def check_report(self):
+        self.ensure_one()
+        data = {}
+        data['ids'] = self.env.context.get('active_ids', [])
+        data['model'] = self.env.context.get('active_model', 'ir.ui.menu')
+        data['form'] = self.read(['date_from', 'date_to', 'journal_ids', 'target_move', 'fake_field'])[0]
+        used_context = self._build_contexts(data)
+        data['form']['used_context'] = dict(used_context, lang=self.env.context.get('lang') or 'en_US')
+        return self._print_report(data)
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

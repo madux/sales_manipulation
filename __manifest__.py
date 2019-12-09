@@ -8,12 +8,14 @@
     'category': 'Base',
     # 'live_test_url': "https://www.youtube.com/watch?v=KEjxieAoGeA&feature=youtu.be",
 
-    'depends': ['base', 'account', 'sale'],
+    'depends': ['base', 'branch', 'account', 'sale'],
     'data': [
         'security/security_group.xml', 
         'views/sales_manipulation_view.xml',
         'views/account_common_report.xml',
         'security/ir.model.access.csv',
+        'report/sales_report.xml',
+        'wizard/sales_wizard_view.xml',
     ],
     # 'qweb': [
     #     'static/src/xml/base.xml',

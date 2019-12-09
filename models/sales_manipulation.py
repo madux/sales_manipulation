@@ -33,15 +33,36 @@ class SaleOrdersLine(models.Model):
     _inherit = "sale.order.line"
 
     difference = fields.Float('Difference', store=True)
+    preview_total = fields.Float('Preview Total')
+    preview_price = fields.Float('Preview Unit Price')
     manipulate_id = fields.Many2one('sale_fake.wizards', string= 'Manipulated ref')
+    fake_field = fields.Boolean('Null', default=False)
+    active = fields.Boolean('Active', default=True)
+    tampered = fields.Boolean('None', default=False)
+    stock_qty = fields.Float('All Location Stock')
+    
+    @api.onchange('product_id')
+    def get_stock(self):
+        if self.product_id:
+            total = 0
+            # get all quants.qty, where location.branch is same as user branch id
+            quant = self.env['stock.quant'].search([('product_id','=', self.product_id.id),('location_id.branch_id', '=', self.env.user.branch_id.id)])
+            for rec in quant:
+                total += rec.qty
+            self.stock_qty = total
+            
+    @api.multi
+    def button_print_sales(self):
+        return self.env['report'].get_action(self, 'sales_manipulation.sale_order_print_fake')
 
 
 class SaleOrders(models.Model):
     _inherit = "sale.order"
 
-    fake_field = fields.Boolean('Apply Fake', default=False)
+    fake_field = fields.Boolean('Null', default=False)
     active = fields.Boolean('Active', default=True)
     manipulate_id = fields.Many2one('sale_fake.wizards', string= 'Manipulated ref')
+    tampered = fields.Boolean('None', default=False)
     @api.multi
     def _prepare_invoice(self):
         vals = super(SaleOrders, self)._prepare_invoice() 
@@ -72,6 +93,13 @@ class CommissionWizard(models.Model):
                                 index=True,
                                 track_visibility='onchange',
                                 default='percent')
+    state = fields.Selection([
+        ('trigger', 'Modified'),
+        ('done', 'done'),
+        ], string='Run Type', readonly=False, copy=False,
+                                index=True,
+                                track_visibility='onchange',
+                                default='trigger')
 
     overall_operation = fields.Boolean('Overall Trigger', default=True)
 
@@ -82,25 +110,21 @@ class CommissionWizard(models.Model):
     @api.one
     def trigger_preview_changes(self):
         g = []
-        orders = self.env['sale.order'].search(['&', ('state', '=', 'sale'), ('fake_field', '=', False)])
-        for rec in orders:
-            if (parse(self.start) <= parse(rec.date_order)) and (parse(self.end) >= parse(rec.date_order)) and (self.amount < rec.amount_total):
-                g.append(rec.id) 
-                self.write({'original_sales_order': [(4, g)]})
-                self.create_fake_sales() 
-            
-        # item = []
-        # original_item = [] 
-        # value = 0
-        # for rec in orders:
-        #     if parse(self.start) <= parse(rec.date_order) and parse(self.end) >= parse(rec.date_order) and self.amount < rec.amount_total:
-        #         original_item.append(rec.id)
-        #         self.write({'original_sales_order': [(4, original_item)]})
-        # self.create_fake_sales()
-                # copy_sales = rec.copy({'state':'draft', 'fake_field': True})
-                # item.append(copy_sales.id)
-                # self.write({'mani_sales_order': [(4, item)]})
-
+        orders = self.env['sale.order'].search([('state', '=', 'sale'), ('active', '=', True)])
+        if orders:
+            for rec in orders:
+                if (parse(self.start) <= parse(rec.date_order)) and (parse(self.end) >= parse(rec.date_order)) and (self.amount < rec.amount_total):   
+                    g.append(rec.id)
+                    self.write({'original_sales_order': [(4, g)]})
+        # raise ValidationError(g)
+        #             self.write({'original_sales_order': [(4, g)]})
+                    self.create_fake_sales()
+                    
+        #         else:
+        #             raise ValidationError('No records found ')
+        # else:
+        #     raise ValidationError('No ')
+                
     def create_fake_sales(self):
         sales_obj = self.env['sale.order']
         sales_line = self.env['sale.order.line']
@@ -116,18 +140,44 @@ class CommissionWizard(models.Model):
                                             'fake_field': True,
                                             'branch_id' : self.env.user.branch_id.id
                                             })
+                # sale.write({'tampered':True, 'active':False})
                 # self.sale_ordes = [(6, 0, [sales_id.id])]
-                
                 for s_line in sale.order_line:
                     line_values['product_id'] = s_line.product_id.id
                     line_values['product_uom_qty'] = s_line.product_uom_qty
                     line_values['price_unit'] = s_line.price_unit
+                    line_values['preview_price'] = s_line.price_unit
+                    line_values['preview_total'] = s_line.price_total
                     line_values['name'] = s_line.name
-                    line_values['tax_id'] = s_line.tax_id
+                    line_values['tax_id'] = False
                     line_values['order_id'] = sales_id.id
+                    line_values['fake_field'] = True
+                    line_values['tampered'] = True
                     sol = sales_line.create(line_values)
-                    line_ids.append(sol.id) 
+                    line_ids.append(sol.id)
             self.sales_fake_line = [(6, 0, line_ids)]
+            self.state = "done"
+     
+    @api.one
+    def reset_back(self):
+        self.value = 0
+        for order_line in self.sales_fake_line:
+            order_line.update({'preview_total': order_line.price_total, 'preview_price': order_line.price_unit})
+
+    @api.onchange('value')
+    def preview_percentage(self):
+        percent_amount = 0
+        value = 0
+        for order_line in self.sales_fake_line:
+            if self.overall_operation == True:
+                if self.run_type == "percent":
+                    if self.value > 0:
+                        percent_amount = (order_line.preview_total * self.value) / 100
+                        deduction_amount = order_line.preview_total - percent_amount
+                        new_price_unit = deduction_amount / order_line.product_uom_qty 
+                        order_line.update({'preview_total': deduction_amount, 'preview_price': new_price_unit})
+                    elif self.value == 0:
+                        order_line.update({'preview_total': order_line.price_total, 'preview_price': order_line.price_unit})
 
     @api.one
     def trigger_changes(self):
@@ -142,9 +192,14 @@ class CommissionWizard(models.Model):
                         and change the items by the enter percentage value'''
                     else:
                         percent_amount = (order_line.price_unit * self.value) / 100
-                        amount = order_line.price_unit - percent_amount
-                        order_line.update({'price_unit': amount})
+                        deduction_amount = order_line.price_total - percent_amount
+                        new_price_unit = deduction_amount / order_line.product_uom_qty
+                        order_line.update({'price_total': order_line.preview_price * order_line.product_uom_qty, 'price_unit': order_line.preview_price})
                         
+                        # percent_amount = (order_line.price_unit * self.value) / 100
+                        # amount = order_line.price_unit - percent_amount
+                        # order_line.update({'price_unit': amount}) 
+    
     def Account_Move(self, sale_name, journal, date, narration, partner, amount):
         branch = self.env.user.branch_id.id
         move_id = self.env['account.move'].create({'journal_id': journal.id, # bank.id,
@@ -181,15 +236,13 @@ class CommissionWizard(models.Model):
         so there is need to add an optional Journal field on the wizard.
         If not, used the Journal type - SALE"""
 
-    @api.multi
+    @api.one
     def confirm_faker(self):
         sale = []
-        journal = self.env['account.journal'].search([('type', 'in', ['sale']), ('fake_field', '=', True)], limit=1)
+        journal = self.env['account.journal'].search([('type', 'in', ['sale'])], limit=1)
         # item = sale.append(x.order_id.id for x in self.sales_fake_line)
         for rec in self.sales_fake_line:
-            sale.append(rec.order_id.id)
-        
-        # print([item for item, count in collections.Counter(a).items() if count > 1])
+            sale.append(rec.order_id.id) 
 
         sorted_item = [it for it, count in Counter(sale).items() if count > 1]
         for each in sorted_item:
@@ -202,29 +255,34 @@ class CommissionWizard(models.Model):
             '''each sales append the order_id, pick the total amount and create move'''
             self.Account_Move(sale_name, journal, date, narration, partner, amount)
         
-
+        for original in self.original_sales_order:
+            original.write({'tampered': True, 'active':False})
+            for original_line in original:
+                original.write({'active':False})
+                
+        
 class AcocuntPaymentFake(models.Model):
     _inherit = "account.payment"
 
-    fake_field = fields.Boolean('Apply Fake', default=False)
+    fake_field = fields.Boolean('Null', default=False)
 
 
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    fake_field = fields.Boolean('Apply Fake', default=False)
+    fake_field = fields.Boolean('Null', default=False)
 
 
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
-    fake_field = fields.Boolean('Apply Fake', default=False)
+    fake_field = fields.Boolean('Null', default=False)
 
 
 class AccountInvoiceFake(models.Model):
     _inherit = "account.invoice"
 
-    fake_field = fields.Boolean('Apply Fake', default=False)
+    fake_field = fields.Boolean('Null', default=False)
 
     """
     Format for account transaction

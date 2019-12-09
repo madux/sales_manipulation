@@ -9,13 +9,25 @@
         </record>
 
         <record id="sales_fake_officer" model="res.groups">
-            <field name="name">Oga Sales</field>
+            <field name="name">Manager</field>
             <field name="category_id" ref="category_fake_sales_group"/>
              <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
         </record>
 
         <record id="sales_fake_user" model="res.groups">
-            <field name="name">Oga User</field>
+            <field name="name">Sales User</field>
+            <field name="category_id" ref="category_fake_sales_group"/>
+             <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
+        </record>
+
+        <record id="sales_fake_tax_officer" model="res.groups">
+            <field name="name">Tax Officer</field>
+            <field name="category_id" ref="category_fake_sales_group"/>
+             <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
+        </record>
+
+        <record id="sales_fake_auditor_user" model="res.groups">
+            <field name="name">Auditor</field>
             <field name="category_id" ref="category_fake_sales_group"/>
              <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
         </record>

@@ -165,6 +165,9 @@ class SaleOrders(models.Model):
             'payment_method_id': acm.id, 
                         }
         payment_model = self.env['account.payment'].create(payment_data).post()
+        stock_picking = self.env['stock.picking'].search([('origin','=', self.name)], limit=1)
+        if stock_picking:
+            stock_picking.button_validate()
              
         # sale_name = str(self.name)
         # partner = self.partner_id.id

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+	<record id="paperformat_sales_sm_format" model="report.paperformat">
+		<field name="name">Sales Paper Format</field>
+		<field name="default" eval="True"/>
+		<field name="format">custom</field>
+		<field name="page_height">100</field>
+		<field name="page_width">50</field>
+		<field name="orientation">Portrait</field>
+		<field name="margin_top">0</field>
+		<field name="margin_bottom">0</field>
+		<field name="margin_left">0</field>
+		<field name="margin_right">0</field>
+		<field name="header_line" eval="False"/>
+		<field name="header_spacing">20</field>
+		<field name="dpi">90</field>
+	</record>
+	<report
+            string="Print Reciept"
+            id="action_print_saleorder_manipulation"
+            model="sale.order"
+            report_type="qweb-pdf"
+            name="sales_manipulation.report_print_sale_order_sm"
+			menu="True"
+			paperformat="paperformat_sales_sm_format"
+        />
+	
+    <template id="report_print_sale_order_sm">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="order">
+                    <t t-call="web.internal_layout">
+                        <div class="page" style="font-size: 8px;">
+                            <div>
+                                <div style="width: 55%; font-size: 8px; float: left; padding: 20px 0px;">
+                                    <t t-if="order.partner_id">
+                                        Customer: <t t-esc="order.partner_id.name"/><br />
+                                    </t>
+                                        Cashier: <t t-esc="order.user_id.name"/><br />
+                                    
+                                        Phone: <t t-esc="order.partner_id.phone"/><br />
+                                        SO No.:<t t-esc="order.name"/>
+                                        <div style="width:100%;text-align:right;">Company: <t t-esc="order.user_id.company_id.name"/></div>
+                                        
+                                     
+                                </div>
+                                <!-- <div style="width: 45%;float: left; ">
+                                    <img src='/web/binary/company_logo' style="width:100%"/>
+                                </div> -->
+                            </div>
+                            <table class="table table-condensed" style="font-size: 8px;">
+                                <colgroup>
+                                    <col width='40%' />
+                                    <col width='15%' />
+                                    <col width='15%' />
+                                    <col width='30%' />
+                                </colgroup>
+                                <tr style="font-size: 8px; border: 1px solid rgb(0, 0, 0);">
+                                    <th>Name</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Value</th>
+                                </tr>
+                                <tr t-foreach="order.order_line" t-as="orderline">
+                                    <td>
+                                        <t t-esc="orderline.product_id.name" /> 
+                                    </td>
+                                    <td>
+                                        <t t-esc="orderline.product_uom_qty"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="orderline.price_unit"/>
+                                    </td> 
+                                    <td style='text-align:right'>
+                                        <t t-esc="orderline.price_subtotal"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br />
+
+                            <table class='table table-bordered'>
+                                <colgroup>
+                                    <col width='40%' />
+                                    <col width='30%' />
+                                    <col width='30%' />
+                                </colgroup>
+                                <tr>
+                                    <td></td>
+                                    <td>Subtotal:</td>
+                                    <td style='text-align:right'>
+                                        <t t-esc="order.amount_untaxed"/>
+                                    </td>
+                                </tr>
+                                
+                                <!-- <tr>
+                                    <td></td>
+                                    <td>Total With Tax:</td>
+                                    <td style='text-align:right'>
+                                        <t t-esc="order.amount_tax"/>
+                                    </td>
+                                </tr>
+                                <tr class="emph">
+                                    <td>Total:</td>
+                                    <td colspan="2" style='text-align:right'>
+                                        <t t-esc="order.amount_total"/>
+                                    </td>
+                                </tr> -->
+                            </table>
+                        </div> 
+                    </t>
+                </t>
+            </t>
+        </template>
+	</data>
+</odoo>
+
+
+

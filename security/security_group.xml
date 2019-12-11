@@ -37,14 +37,14 @@
         <record id="fake_sale_user_see_own_rule" model="ir.rule">
             <field name="name">Fake Sales User See Own Record</field>
             <field name="model_id" ref="model_sale_order"/>
-            <field name="groups" eval="[(4 , [ref('sales_fake_user')])]"/>
+            <field name="groups" eval="[(4 , ref('sales_manipulation.sales_fake_user'))]"/>
             <field name="domain_force">['|', ('fake_field','=', False),('Active','=', True)]</field>
         </record>
 
         <record id="fake_officer_see_all_fake_record" model="ir.rule">
             <field name="name">Users See Fake Records</field>
             <field name="model_id" ref="model_sale_order"/>
-            <field name="groups" eval="[(6, 0, [ref('sales_fake_officer')])]"/>
+            <field name="groups" eval="[(6, 0, [ref('sales_manipulation.sales_fake_officer')])]"/>
             <field name="domain_force">[(1,'=',1)]</field>
         </record>
     </data>

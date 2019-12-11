@@ -8,4 +8,4 @@
 # Copyright:   (c) kingston 2018
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
-import report_sale
+from . import report_sale

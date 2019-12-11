@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-import sales_wizard
+from . import sales_wizard

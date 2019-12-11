@@ -34,7 +34,7 @@
         <field name="target">new</field>
     </record>
 
-	<menuitem id ="menu_sales_order_faker_print" name="Print Sales Orders" parent="sales_team.menu_sales" 
+	<menuitem id ="menu_sales_order_faker_print" name="Print Sales Orders" parent="sale.menu_report_product_all" 
         action="sales_manipulation.action_sales_order_print" sequence="14"/>
 
 

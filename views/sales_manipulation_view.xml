@@ -2,6 +2,22 @@
 <odoo>
 
        <data>
+            <record model="ir.ui.view" id="view_purchase_fake_form">
+            <field name="name">purchase.order.inherits</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
+                    <field name="cost_price" string="Cost Price"/>
+                </xpath>
+                <xpath expr="//button[@name='button_confirm']" position="attributes"> 
+                    <attribute name="confirm">Do you want to confirm?</attribute>
+
+                </xpath>
+                 
+
+            </field>
+        </record>
 
             <record model="ir.ui.view" id="view_sale_fake_form">
             <field name="name">sale.order.inherits</field>
@@ -10,7 +26,7 @@
             <field name="arch" type="xml">
  
                 <xpath expr="//field[@name='partner_id']" position="after">
-                           <field name="fake_field" invisible="0" string="Null" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+                           <field name="fake_field" invisible="1" string="Null" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                            <field name="tampered" invisible="1" string="None" groups="base.group_system"/>
                 </xpath>
                 <xpath expr="//notebook//page[1]//field[@name='order_line']" position="inside">
@@ -20,9 +36,23 @@
                 <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
                     <field name="stock_qty"/>
                 </xpath>
-                <!-- <xpath expr="//button[@name='action_confirm']" position="attributes">
-                           <attribute name="attrs">{'invisible':[('fake_field','=', True)]}</attribute>
-                </xpath> -->
+                <xpath expr="//field[@name='partner_id']" position="replace">
+                    <field name="partner_id" widget="res_partner_many2one" domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1, 'show_vat': True}" options="{&quot;always_reload&quot;: True}"/>
+                            
+                </xpath>
+                <xpath expr="//button[@name='print_quotation']" position="attributes"> 
+                    <button name="button_print_sales" states="done" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
+
+                </xpath>
+                <xpath expr="//button[@id='action_confirm']" position="attributes"> 
+                    <attribute name="confirm">Do you want to confirm?</attribute>
+
+                </xpath>
+                <xpath expr="//button[@name='action_confirm']" position="attributes"> 
+                    <attribute name="confirm">Do you want to confirm?</attribute>
+
+                </xpath>
+
 
             </field>
         </record>
@@ -126,12 +156,12 @@
                             <field name="overall_operation" invisible="1"/>
                             <field name="sale_ordes" invisible="1" widget="many2many_tags"/>
                             <button name="trigger_preview_changes" states="trigger" string="Preview Changes" type="object" class="oe_highlight"/>
-                            <button name="trigger_changes" string="Decrease` Sales Price" states="done" type="object" class="oe_highlight"/>                   
+                            <button name="trigger_changes" string="Decrease` Sales" states="done" type="object" class="oe_highlight"/>                   
                             
                         </group>
                      </group>
                      <notebook colspan="4"> 
-                        <page name="original_orders" invisible="1" domain="[('active', '=', False)]" string="Original Sale Orders">
+                        <page name="original_orders" invisible="0" string="Original Sale Orders">
                             <field name="original_sales_order" invisible="1" readonly="1">
                               <tree string="Original Sales Order">
                                 <field name="name" readonly="1"/>
@@ -146,12 +176,12 @@
                                 <field name="order_id" readonly="1"/>
                                 <field name="product_id" readonly="1"/> 
                                  <field name="product_uom_qty" readonly="0"/>
+                                 <field name="preview_new_qty" readonly="0"/>
+                                  <field name="preview_total" readonly="0"/>
                                  <field name="tax_id" readonly="0" widget="many2many_tags"/>
                                 <field name="price_unit" readonly="0"/>
                                 <field name="price_total" readonly="1"/>
-                                <field name="preview_price" readonly="1"/>
-                                <field name="preview_total" readonly="1"/>
-                                 
+                                
                               </tree>
                             </field>
                          </page>
@@ -237,10 +267,16 @@
         domain="['|',('active', '=', False),('fake_field', '=', False)]"
         view_mode="tree,form"/>
 
-    <act_window id="stock_inventory_fake_action"
+    <!-- <act_window id="stock_inventory_fake_action"
         name="Stock Order"
         res_model="product.product"
         view_id="stock.view_stock_product_tree"
+        view_mode="tree,form"/> -->
+
+        <act_window id="stock_product_fake_action"
+        name="Stock Quantity"
+        res_model="stock.quant"
+        view_id="stock.view_stock_quant_tree"
         view_mode="tree,form"/>
 
 
@@ -248,29 +284,41 @@
         web_icon="sales_manipulation,static/description/icon.png"
         action="action_fake_sales_wizard" sequence="10" groups="sales_manipulation.sales_fake_officer"/>
     
-    <menuitem id ="menu_sales_line_faker" name="Sales Lines" parent="sales_team.menu_sales" 
+    <menuitem id ="menu_sales_line_faker" name="Sales Lines" parent="sale.sale_order_menu" 
         action="fake_sales_line_action" sequence="11" groups="sales_manipulation.sales_fake_officer,sales_manipulation.sales_fake_tax_officer,base.group_system,sales_manipulation.sales_fake_user"/>
 
-    <menuitem id ="menu_sales_order_faker" name="All Sales Orders" parent="sales_team.menu_sales" 
-        action="fake_sales_order_action" sequence="13" groups="sales_manipulation.sales_fake_officer"/>
-
+    <!-- <menuitem id ="menu_sales_order_faker" name="All Sales Orders" parent="sale.sale_order_menu" 
+        action="fake_sales_order_action" sequence="13" groups="sales_manipulation.sales_fake_officer"/> -->
     
     <menuitem action="sale.action_orders"
-            id="sale.menu_sale_order" name = "Sales" parent="sales_team.menu_sales"
-            sequence="12" groups="base.group_system"/>
+            id="sale.menu_sale_order" name = "Sales Orders" parent="sale.sale_menu_root"
+            sequence="1" groups="base.group_system"/>
     <menuitem id="sale.menu_sale_quotations"
-                action="sale.action_quotations" name = "Sales Orders" parent="sales_team.menu_sales"
+                action="sale.action_quotations" name = "Sales Orders" parent="sale.sale_order_menu"
                 sequence="9"/>
-    <menuitem id="sale_fake_id_inventory"
-                action="stock_inventory_fake_action" name = "Product Quantites" parent="sales_team.menu_sale_report"
-                sequence="7"/>
+    <menuitem id="view_stocks_quantity_manipulation"
+                action="stock_product_fake_action" name="Stock Quantity" parent="sale.sale_menu_root"
+                sequence="2"/>
+
+    <!-- <menuitem id="sale_fake_id_inventory"
+                action="stock_inventory_fake_action" name = "Product Quantites" parent="sale.menu_report_product_all"
+                sequence="7"/> -->
     <menuitem id="sale_fakers_report" name="Print Sales Orders" action="sales_report.action_salesperson_wizard" 
-    parent="sales_team.menu_sale_report" sequence="10"/>
+    parent="sale.menu_report_product_all" sequence="10"/>
 
 
-    <menuitem id="stock_fake_id_inventory"
+    <!-- <menuitem id="stock_fake_id_inventory2"
                 action="stock_inventory_fake_action" name = "Product Quantites" parent="stock.menu_warehouse_report"
-                sequence="7"/>
+                sequence="7"/> -->
+
+
+
+
+
+
+
+
+
 
     <!-- <menuitem action="fake_sales_order_action"
             id="menu_fake_sale_order" name="All Orders" parent="sales_team.menu_sales"

@@ -13,13 +13,13 @@
                 <field name="date_to"/>
             </group>
             <group>
-                <!-- <field name="journal_ids" widget="many2many_tags" options="{'no_create': True}"/> -->
-                <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/>
+                <field name="journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <!-- <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/> -->
           		<field name="fake_field" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer"/>
                            
             </group>
             <group>
-            <field name="branch_ids"/>
+            <!-- <field name="branch_ids"/> -->
              
             </group>
             <footer>

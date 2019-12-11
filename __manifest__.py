@@ -8,14 +8,17 @@
     'category': 'Base',
     # 'live_test_url': "https://www.youtube.com/watch?v=KEjxieAoGeA&feature=youtu.be",
 
-    'depends': ['base', 'branch', 'account', 'sale'],
+    'depends': ['base','purchase', 'account','sales_report','sale_management'],
     'data': [
-        'security/security_group.xml', 
+        
         'views/sales_manipulation_view.xml',
         'views/account_common_report.xml',
         'security/ir.model.access.csv',
         'report/sales_report.xml',
+        'report/sale_paper_report.xml',
         'wizard/sales_wizard_view.xml',
+        'views/expenses_sm.xml',
+        'security/security_group.xml', 
     ],
     # 'qweb': [
     #     'static/src/xml/base.xml',

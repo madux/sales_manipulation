@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+           
+        
+    <record id="view_expenses_sm_form_views" model="ir.ui.view">
+        <field name="model">sm.expenses</field>
+        <field name ="name">Create Expenses</field>
+        <field name="arch" type="xml">
+            <form string="Sales">
+            <header>
+                <button name="Confirm_Expenses" string="Confirm" states="draft" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
+                <field name="state" id ="state_exp" widget="statusbar" statusbar_visible="draft,done"/>
+
+            </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="description"/>
+                        <h2><field name="description"/></h2>
+                    </div>
+                    <group colspan="20">
+                        <group>
+                            <field name="user_id" readonly="1"/>
+                            <field name="start"/>
+                            <field name="amount"/>                   
+                        </group>
+                       
+                        <group>                  
+                      
+                            <field name="journal_id" string="Journal" required="1"/> 
+                            <field name="note" invisible="0"/>
+                            <field name="partner_id" invisible="0"/>
+                        </group>
+                     </group>
+                    <!-- <footer>
+                        <button name="Confirm_Expenses" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer> -->
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sm_expenses_tree_view" model="ir.ui.view">
+        <field name="model">sm.expenses</field>
+        <field name ="name">Create Expenses</field>
+        <field name="arch" type="xml">
+            <tree string="Expense Lines">
+                
+                 <field name="user_id" readonly="1"/>
+                <field name="partner_id" domain="[('supplier','=', True)]" invisible="0"/>
+                <field name="start"/>
+                <field name="journal_id" domain="[('type','=', 'purchase')]" string="Journal" required="1"/> 
+
+                <field name="amount"/> 
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_sm_expenses" model="ir.actions.act_window">
+        <field name="name">Create Expenses</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sm.expenses</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field> 
+        <field name="target">current</field>
+        <field name="multi">True</field>
+    </record>
+
+    
+    <menuitem id ="expenses_menu_id" name="Expenses"
+        web_icon="sales_manipulation,static/description/iconmain.png"
+        action="action_sm_expenses" sequence="12" groups="sales_team.group_sale_manager"/>
+    </data>
+ </odoo>

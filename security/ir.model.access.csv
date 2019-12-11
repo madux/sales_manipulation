@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_id_fake_sales_order,fake_sale_id,model_sale_fake_wizards,sales_manipulation.sales_fake_officer,1,1,1,1
+access_id_expense_sm,expense_sm_name,model_sm_expenses,,1,1,1,1

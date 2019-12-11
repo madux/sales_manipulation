@@ -11,7 +11,7 @@
                 </xpath>
                 <xpath expr="//button[@name='button_confirm']" position="attributes"> 
                     <attribute name="confirm">Do you want to confirm?</attribute>
-                </xpath>
+                </xpath> 
             </field>
         </record>
 
@@ -36,8 +36,8 @@
                 <xpath expr="//field[@name='partner_id']" position="replace">
                     <field name="partner_id" widget="res_partner_many2one" domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1, 'show_vat': True}" options="{&quot;always_reload&quot;: True}"/>
                 </xpath>
-                <xpath expr="//button[@name='print_quotation']" position="attributes"> 
-                    <button name="button_print_sales" states="done" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
+                <xpath expr="//button[@name='print_quotation']" position="after"> 
+                    <button name="action_view_delivery" states="sale,done,sent,cancel" string="Deliver" type="object" class="oe_highlight"/>
                 </xpath>
                 <xpath expr="//button[@id='action_confirm']" position="attributes"> 
                     <attribute name="confirm">Do you want to confirm?</attribute>
@@ -45,6 +45,13 @@
                 <xpath expr="//button[@name='action_confirm']" position="attributes"> 
                     <attribute name="confirm">Do you want to confirm?</attribute>
                 </xpath>
+
+                <!-- <xpath expr="//button[@name='action_quotation_send']" position="before"> 
+                    <button type="object"
+                        name="action_view_delivery"
+                        states="sent,sale,done" groups="base.group_user"/>
+                </xpath> -->
+
             </field>
         </record>
 

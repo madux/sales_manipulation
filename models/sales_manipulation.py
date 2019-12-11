@@ -1,5 +1,3 @@
-
-
 '''
 Wizard pop up to select all the records filtered based on the added amount
 - Add A fake boolean field on sales order
@@ -28,6 +26,7 @@ from dateutil.parser import parse
 from collections import Counter
 sales_lister = []
 
+
 class productTemplate(models.Model):
     _inherit = "product.template"
     _order = "id desc"
@@ -42,6 +41,7 @@ class PurchaseOrderLine(models.Model):
 
     cost_price = fields.Float('Initial Cost', related="product_id.standard_price")
     
+
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
     _order = "id desc"
@@ -74,9 +74,6 @@ class PurchaseOrder(models.Model):
                         }
         payment_model = self.env['account.payment'].create(payment_data).post()
         
-    # @api.multi
-    # def button_print_purchases(self):
-    #     return self.env['report'].get_action(self, 'ikoyi_module.purchase_order_prints')
 
 class SaleOrdersLine(models.Model):
     _inherit = "sale.order.line"
@@ -141,13 +138,18 @@ class SaleOrders(models.Model):
            
     @api.multi
     def action_confirm(self):
-        res = super(SaleOrders, self).action_confirm() 
+        res = super(SaleOrders, self).action_confirm()
+        # self.action_view_delivery()
+        # stock_picking = self.env['stock.picking'].search([('origin','=', self.name)], limit=1)
+        # if stock_picking:
+        #     stock_picking.do_new_transfer()
         self.Account_Move()
         return res
 
-    @api.multi
-    def button_print_sales(self):
-        return self.env['report'].get_action(self, 'sales_manipulation.report_print_sale_order_sm')
+    # @api.multi
+    # def button_print_sales(self):
+    #     # return self.env['report'].get_action(self, 'sales_manipulation.report_print_sale_order_sm')
+    #     return self.env.ref('sales_manipulation.report_print_sale_order_sm').get_action(self)
 
     def Account_Move(self):
         journal = self.env['account.journal'].search([('type', 'in', ['sale'])], limit=1)
@@ -165,41 +167,6 @@ class SaleOrders(models.Model):
             'payment_method_id': acm.id, 
                         }
         payment_model = self.env['account.payment'].create(payment_data).post()
-        stock_picking = self.env['stock.picking'].search([('origin','=', self.name)], limit=1)
-        if stock_picking:
-            stock_picking.button_validate()
-             
-        # sale_name = str(self.name)
-        # partner = self.partner_id.id
-        # date = fields.Date.today()
-        # narration = "SO - For" + sale_name
-        # amount = self.amount_total 
-        # move_id = self.env['account.move'].create({'journal_id': journal.id,  
-        #                                            'ref': sale_name,
-        #                                            'date': date,
-        #                                            'narration': narration, 
-        #                                            })
-        # # create account.move.line for both debit and credit
-        # acc_move_line = self.env['account.move.line']
-        # line_id_dr = acc_move_line.with_context(check_move_validity=False)\
-        #     .with_context(check_move_validity=False).create({
-        #                                 'move_id': move_id.id,
-        #                                 'ref': sale_name,
-        #                                 'name': narration,
-        #                                 'partner_id': partner,
-        #                                 'account_id': journal.default_debit_account_id.id, 
-        #                                 'debit': amount,
-        #                                 # 'analytic_account_id': if any?
-        #                 })
-
-        # line_id_cr = self.env['account.move.line'].with_context(check_move_validity=False).create({
-        #                                 'move_id': move_id.id,
-        #                                 'ref': sale_name,
-        #                                 'name': narration,
-        #                                 'partner_id': partner,
-        #                                 'account_id': journal.default_credit_account_id.id,
-        #                                 'credit': amount,
-        #                 })
 
 
 class CommissionWizard(models.Model):
@@ -288,98 +255,7 @@ class CommissionWizard(models.Model):
             if self.overall_operation == True:
                 order_line.update({'product_uom_qty': round(order_line.preview_new_qty)})
 
-    # def create_fake_sales(self):
-    #     sales_obj = self.env['sale.order']
-    #     sales_line = self.env['sale.order.line']
-    #     line_values = {}
-    #     sale_dict = {}
-    #     line_ids = []
-    #     if self.original_sales_order:
-    #         for sale in self.original_sales_order:
-    #             sales_id = sales_obj.create({
-    #                                         'partner_id': sale.partner_id.id,
-    #                                         'date_order': sale.date_order,
-    #                                         'payment_term_id': sale.payment_term_id.id,
-    #                                         'fake_field': True,
-    #                                         })
-    #             for s_line in sale.order_line:
-    #                 line_values['product_id'] = s_line.product_id.id
-    #                 line_values['product_uom_qty'] = s_line.product_uom_qty
-    #                 line_values['price_unit'] = s_line.price_unit
-    #                 line_values['preview_price'] = s_line.price_unit
-    #                 line_values['preview_total'] = s_line.price_total
-    #                 line_values['name'] = s_line.name
-    #                 line_values['tax_id'] = False
-    #                 line_values['order_id'] = sales_id.id
-    #                 line_values['fake_field'] = True
-    #                 line_values['tampered'] = True
-    #                 sol = sales_line.create(line_values)
-    #                 line_ids.append(sol.id)
-    #         self.sales_fake_line = [(6, 0, line_ids)]
-    #         self.state = "done"
-    
-    # def Account_Move(self, sale_name, journal, date, narration, partner, amount):
-    #     # branch = self.env.user.branch_id.id
-    #     move_id = self.env['account.move'].create({'journal_id': journal.id, # bank.id,
-    #                                                'ref': sale_name,
-    #                                                'date': date,
-    #                                                'fake_field': True,
-    #                                                'narration': narration,
-    #                                             #    'branch_id': branch
-    #                                                })
-    #     # create account.move.line for both debit and credit
-    #     acc_move_line = self.env['account.move.line']
-    #     line_id_dr = acc_move_line.with_context(check_move_validity=False).with_context(check_move_validity=False).create({
-    #                                     'move_id': move_id.id,
-    #                                     'ref': sale_name,
-    #                                     'name': narration,
-    #                                     'partner_id': partner,
-    #                                     'account_id': journal.default_debit_account_id.id,
-    #                                     # 'branch_id': branch,
-    #                                     'debit': amount,
-    #                                     # 'analytic_account_id': if any?
-    #                     })
 
-    #     line_id_cr = self.env['account.move.line'].with_context(check_move_validity=False).create({
-    #                                     'move_id': move_id.id,
-    #                                     'ref': sale_name,
-    #                                     'name': narration,
-    #                                     'partner_id': partner,
-    #                                     'account_id': journal.default_credit_account_id.id,
-    #                                     # 'branch_id': branch,
-    #                                     'credit': amount,
-    #                                     # 'analytic_account_id': if any ?
-    #                     })
-    #     """Code to push to Journal and payment follows up:
-    #     Next thing is to register the payment to the respective journals,
-    #     so there is need to add an optional Journal field on the wizard.
-    #     If not, used the Journal type - SALE"""
-
-    # @api.one
-    # def confirm_faker(self):
-    #     sale = []
-    #     journal = self.env['account.journal'].search([('type', 'in', ['sale'])], limit=1)
-    #     # item = sale.append(x.order_id.id for x in self.sales_fake_line)
-    #     for rec in self.sales_fake_line:
-    #         sale.append(rec.order_id.id) 
-
-    #     sorted_item = [it for it, count in Counter(sale).items() if count > 1]
-    #     for each in sorted_item:
-    #         sale_order = self.env['sale.order'].browse([each])
-    #         sale_name = str(sale_order.name)
-    #         partner = sale_order.partner_id.id
-    #         date = sale_order.date_order
-    #         narration = "SM"
-    #         amount = sale_order.amount_total
-    #         '''each sales append the order_id, pick the total amount and create move'''
-    #         self.Account_Move(sale_name, journal, date, narration, partner, amount)
-        
-    #     for original in self.original_sales_order:
-    #         original.write({'tampered': True, 'active':False})
-    #         for original_line in original:
-    #             original.write({'active':False})
-                
-        
 class AcocuntPaymentFake(models.Model):
     _inherit = "account.payment"
 

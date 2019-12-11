@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <odoo>
-
-       <data>
-            <record model="ir.ui.view" id="view_purchase_fake_form">
+    <data>
+        <record model="ir.ui.view" id="view_purchase_fake_form">
             <field name="name">purchase.order.inherits</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
@@ -12,48 +11,40 @@
                 </xpath>
                 <xpath expr="//button[@name='button_confirm']" position="attributes"> 
                     <attribute name="confirm">Do you want to confirm?</attribute>
-
                 </xpath>
-                 
-
             </field>
         </record>
 
-            <record model="ir.ui.view" id="view_sale_fake_form">
+        <record model="ir.ui.view" id="view_sale_fake_form">
             <field name="name">sale.order.inherits</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
- 
                 <xpath expr="//field[@name='partner_id']" position="after">
-                           <field name="fake_field" invisible="1" string="Null" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
-                           <field name="tampered" invisible="1" string="None" groups="base.group_system"/>
+                    <field name="fake_field" invisible="1" string="Null" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
+                    <field name="tampered" invisible="1" string="None" groups="base.group_system"/>
                 </xpath>
                 <xpath expr="//notebook//page[1]//field[@name='order_line']" position="inside">
                     <field name="difference" invisible="0"/>
-                         
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
                     <field name="stock_qty"/>
                 </xpath>
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="before">
+                    <field name="cost_price" invisible="0"/>
+                </xpath>
                 <xpath expr="//field[@name='partner_id']" position="replace">
                     <field name="partner_id" widget="res_partner_many2one" domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1, 'show_vat': True}" options="{&quot;always_reload&quot;: True}"/>
-                            
                 </xpath>
                 <xpath expr="//button[@name='print_quotation']" position="attributes"> 
                     <button name="button_print_sales" states="done" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
-
                 </xpath>
                 <xpath expr="//button[@id='action_confirm']" position="attributes"> 
                     <attribute name="confirm">Do you want to confirm?</attribute>
-
                 </xpath>
                 <xpath expr="//button[@name='action_confirm']" position="attributes"> 
                     <attribute name="confirm">Do you want to confirm?</attribute>
-
                 </xpath>
-
-
             </field>
         </record>
 
@@ -67,8 +58,7 @@
                            <field name="fake_field" invisible="0" string="Null" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                 </xpath>
                 <xpath expr="//notebook//page[1]//field[@name='order_line']" position="inside">
-                            <field name="difference" invisible="0"/>
-                         
+                     <field name="difference" invisible="0"/>
                 </xpath>
                 
             </field>
@@ -82,7 +72,6 @@
                 <xpath expr="//field[@name='company_id']" position="after">
                            <field name="fake_field" string="Null" invisible="1" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                 </xpath>
-                
             </field>
         </record>
         <record model="ir.ui.view" id="fake_account_journal_inherited_form" >
@@ -93,7 +82,6 @@
                 <xpath expr="//field[@name='company_id']" position="after">
                            <field name="fake_field" string="Null" invisible="0" groups="sales_manipulation.sales_fake_officer,base.group_system"/>
                 </xpath>
-                
             </field>
         </record>
 

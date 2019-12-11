@@ -40,13 +40,11 @@ class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
     _order = "id desc"
 
-    cost_price = fields.Float('All Location Stock')
-
-
+    cost_price = fields.Float('Initial Cost', related="product_id.standard_price")
+    
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
     _order = "id desc"
-
      
     @api.multi
     def button_confirm(self):
@@ -92,23 +90,23 @@ class SaleOrdersLine(models.Model):
     fake_field = fields.Boolean('Null', default=False)
     active = fields.Boolean('Active', default=True)
     tampered = fields.Boolean('None', default=False)
-    stock_qty = fields.Float('All Location Stock')
-    cost_price = fields.Float('All Location Stock', related="product_id.standard_price")
+    stock_qty = fields.Float('Stock Remaining')
+    cost_price = fields.Float('Cost Price', related="product_id.standard_price")
 
     
-    @api.onchange('price_unit')
-    def check_validity(self):
-        if self.price_unit:
-            if self.price_unit < self.product_id.standard_price:
-                raise ValidationError('You are trying to sell a %s below your cost Price. \
-                    Kindly increase the Unit price' %self.product_id.name)
+    # @api.onchange('price_unit')
+    # def check_validity(self):
+    #     if self.price_unit:
+    #         if self.price_unit < self.product_id.standard_price:
+    #             raise ValidationError('You are trying to sell a %s below your cost Price. \
+    #                 Kindly increase the Unit price' %self.product_id.name)
     
     @api.onchange('product_id')
     def get_stock(self):
         if self.product_id:
             total = 0
-            quant = self.env['stock.quant'].search([('product_id','=', self.product_id.id)])
-            
+            quant = self.env['stock.quant'].search([('product_id','=', self.product_id.id),\
+                 ('location_id.usage','=', 'internal')])  
             for rec in quant:
                 total += rec.quantity
             self.stock_qty = total

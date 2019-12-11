@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xml>
+<odoo>
+    <data>
+        <record model="ir.module.category" id="category_fake_sales_group">
+           <field name="name">Main Sales</field>
+           <field name="description">Sales Faker</field>
+           <field name="sequence">33</field>
+        </record>
+
+        <record id="sales_fake_officer" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="category_fake_sales_group"/>
+             <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
+        </record>
+
+        <record id="sales_fake_user" model="res.groups">
+            <field name="name">Sales User</field>
+            <field name="category_id" ref="category_fake_sales_group"/>
+             <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
+        </record>
+
+        <record id="sales_fake_tax_officer" model="res.groups">
+            <field name="name">Tax Officer</field>
+            <field name="category_id" ref="category_fake_sales_group"/>
+             <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
+        </record>
+
+        <record id="sales_fake_auditor_user" model="res.groups">
+            <field name="name">Auditor</field>
+            <field name="category_id" ref="category_fake_sales_group"/>
+             <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
+        </record>
+         
+
+        <!-- Record rules -->
+        <record id="fake_sale_user_see_own_rule" model="ir.rule">
+            <field name="name">Fake Sales User See Own Record</field>
+            <field name="model_id" ref="model_sale_order"/>
+            <field name="groups" eval="[(4 , ref('sales_manipulation.sales_fake_user'))]"/>
+            <field name="domain_force">['|', ('fake_field','=', False),('Active','=', True)]</field>
+        </record>
+
+        <record id="fake_officer_see_all_fake_record" model="ir.rule">
+            <field name="name">Users See Fake Records</field>
+            <field name="model_id" ref="model_sale_order"/>
+            <field name="groups" eval="[(6, 0, [ref('sales_manipulation.sales_fake_officer')])]"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+        </record>
+    </data>
+</odoo>

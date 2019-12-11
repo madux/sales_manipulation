@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+	<record id="sales_wizard_fake" model="ir.ui.view">
+        <field name="name">Report</field>
+        <field name="model">sakefake.wizardho</field>
+        <field name="arch" type="xml">
+        	<form>
+			    <group>
+        			<field name="salesperson_id" /> 
+        		</group>
+				<group col="4">
+        			<field name="date_from" />
+        			<field name="date_to" />
+        		</group>
+        		
+        		<footer>
+	                <button name="check_report" string="Print" type="object" default_focus="1" class="oe_highlight" />
+	                or
+	                <button string="Cancel" class="oe_link" special="cancel" />
+	            </footer>
+			</form>
+        </field>
+    </record>
+
+	<record id="action_sales_order_print" model="ir.actions.act_window">
+        <field name="name">Generate Report</field>
+        <field name="res_model">sakefake.wizardho</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="sales_wizard_fake"/>
+        <field name="target">new</field>
+    </record>
+
+	<menuitem id ="menu_sales_order_faker_print" name="Print Sales Orders" parent="sale.menu_report_product_all" 
+        action="sales_manipulation.action_sales_order_print" sequence="14"/>
+
+
+
+
+</data>
+</odoo>

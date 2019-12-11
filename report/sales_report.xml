@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <!-- Sales Report Action -->
+        <report id="print_sale_order_fake_report"
+            string="Sales Order"
+            model="sale.order.line"
+            report_type="qweb-pdf"
+            name="sales_manipulation.sale_order_print_fake"
+            file="sales_manipulation.sale_order_print_fake"
+            menu="True"
+        />
+
+        <template id="sale_order_print_fake">
+            <t t-call="report.html_container">
+                <t t-foreach="orders" t-as="o">
+                    <t t-call="report.external_layout">
+                        <div class="page">
+                            <div class="row">
+                                <h2>
+                                    <span>
+                                        <center><b>SALES ORDERS</b></center>
+                                    </span>
+                                </h2>
+                            </div>
+                            <!-- <div class="row">
+                                <center> 
+                                    <div class="watermark;col-xs-8" styles="position:absolute;opacity:0.8; font-size:50px;width:200%;z-index">
+                                        <img src="/ikoyi_module/static/img/ikoyi_logo2.png" style="max-height:140px;max-width:100px;"/>
+                                     
+                                    </div>
+                                </center>
+                            </div> -->
+                            <div class="row">
+                                <div class="col-xs-3" style="font-size: 17px;">
+                                    <!--<strong>Ref No:<span t-field="o.name"/> </strong><br/>
+                                     <strong>GRN Number:<span t-field="o.stock_id.name"/> </strong><br/>-->
+                                      <strong>Date:<span t-raw="time.strftime('%Y-%m-%d')"/> </strong><br/>
+                                       <!--<strong>Store Location:<span t-field="o.location.name"/> </strong><br/>-->
+                                </div>
+                                <div class="col-xs-4 pull-right mt8" name ="right_name" style="font-size: 17px;">
+                                   <strong></strong><br/>
+                                </div>
+                            </div><br/><br/>
+                           
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th><strong>S/N</strong></th>
+                                            <th><strong>Customer</strong></th>
+                                            <th><strong>Product</strong></th>
+                                            <th><strong>Description</strong></th>
+                                            <th><strong>SalesPerson</strong></th>
+                                            <th><strong>Qty</strong></th>
+                                            <th><strong>Unit Price</strong></th>
+                                            <th><strong>Amount</strong></th> 
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr> 
+                                        <!--<tr t-foreach="o" t-as="a">-->
+                                            <td>
+                                                <span t-esc="o.order_id.name" />
+                                            </td>
+                                            <td>
+                                                <span t-esc="o.order_partner_id.name" />
+                                            </td>
+                                            <td style="white-space: text-nowrap;">
+                                                <span t-esc="o.product_id.name" />
+                                            </td>
+                                            <td style="white-space: text-nowrap;">
+                                                <span t-esc="o.name" />
+                                            </td>
+                                            <td style="white-space: text-nowrap;">
+                                                <span t-esc="o.salesman_id.name" />
+                                            </td>
+                                            <td style="white-space: text-nowrap;">
+                                                <span t-esc="o.product_uom_qty" />
+                                            </td>
+                                            <td style="white-space: text-nowrap;">
+                                                <span t-field="o.price_unit" t-options='{"widget": "monetary", "display_currency": o.create_uid.company_id.currency_id}' />
+                                            </td>
+                                            <td style="white-space: text-nowrap;">
+                                                <span t-field="o.price_total" t-options='{"widget": "monetary", "display_currency": o.create_uid.company_id.currency_id}' />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table><p/><p/><p/>
+                                <div class="row">
+                                <div class="col-xs-3" style="font-size: 17px;">
+                                    <strong>Authorized Signatory:</strong><p/><p/>
+                                    <strong>.............................................</strong>
+
+                                </div>
+                                <!-- <div class="col-xs-4 pull-right mt8" name ="right_name" style="font-size: 17px;">
+                                    <strong>Signature:................</strong><br/>
+                                    <strong>Ikoyi Club 1938</strong>
+
+                                </div> -->
+                                <!--<div class="col-xs-6 col-xs-offset-8" style="font-size: 17px;">
+                                    <strong>All Payments:</strong> <span t-field="o.all_payments"/><br/>
+                                    <strong>Outstanding:</strong> <span t-field="o.outstanding"/><br/>
+                                    <strong>Total:</strong> <span t-field="o.amount_total"/>
+                                </div>-->
+                                
+                            </div> 
+							</div>
+                            
+					</t>
+				</t>
+			</t>
+		</template>
+        
+	</data>
+</odoo>
+
+
+

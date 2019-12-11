@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<odoo> 
+       <data> 
+        <record id="account.account_common_report_view" model="ir.ui.view">
+        <field name="name">Common Report</field>
+        <field name="model">account.common.report</field>
+        <field name="arch" type="xml">
+        <form string="Report Options">
+            <field name="company_id" invisible="1"/>
+            <group col="4">
+                <field name="target_move" widget="selection"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+            </group>
+            <group>
+                <field name="journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <!-- <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/> -->
+          		<field name="fake_field" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer"/>
+                           
+            </group>
+            <group>
+            <!-- <field name="branch_ids"/> -->
+             
+            </group>
+            <footer>
+                <button name="check_report" string="Print" type="object" default_focus="1" class="oe_highlight"/>
+                or 
+                <button string="Cancel" class="oe_link" special="cancel" />
+            </footer>
+        </form>
+        </field>
+    </record>
+
+
+
+
+
+
+          <!-- <record model="ir.ui.view" id="fake_account_report_commoninherited_form" >
+            <field name="name">Account Common report Inherited</field>
+            <field name="model">account.common.report</field>
+            <field name="inherit_id" ref="account.account_common_report_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='target_move']" position="after">
+                           <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/>
+                </xpath>
+                 <xpath expr="//field[@name='target_move']" position="replace">
+                    <field name="target_move" string="Targets" widget="selection" groups="sales_manipulation.sales_fake_officer"/>
+                </xpath>
+                <xpath expr="//field[@name='target_move']" position="after">
+                           <field name="fake_field" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer"/>
+                           
+                </xpath>
+                
+            </field>
+        </record>    -->
+    </data>
+ </odoo>

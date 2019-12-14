@@ -134,7 +134,7 @@
         <field name="arch" type="xml">
             <form string="Sales">
             <header>
-                <button name="confirm_faker" states="done" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
+                <button name="confirm_changes" states="done" string="Confirm" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
                 <field name="state" id ="state_trigger" widget="statusbar" statusbar_visible="trigger,done"/>
                             
             </header>
@@ -151,7 +151,7 @@
                             <field name="overall_operation" invisible="1"/>
                             <field name="sale_ordes" invisible="1" widget="many2many_tags"/>
                             <button name="trigger_preview_changes" states="trigger" string="Preview Changes" type="object" class="oe_highlight"/>
-                            <button name="trigger_changes" string="Decrease` Sales" states="done" type="object" class="oe_highlight"/>                   
+                            <button name="confirm_changes" string="Confirm" states="done" type="object" class="oe_highlight"/>                   
                             
                         </group>
                      </group>
@@ -165,7 +165,7 @@
                                 <field name="amount_total" readonly="1"/> 
                               </tree>
                             </field>
-                            <separator string="Manipulate Sales Records" colspan="4"/>
+                            <separator string="Sales Records" colspan="4"/>
                             <field name="sales_fake_line" readonly="0">
                               <tree string="Manipulated Sales Order" editable="bottom">
                                 <field name="order_id" readonly="1"/>
@@ -253,14 +253,13 @@
     <act_window id="fake_sales_line_action"
         name="Sales"
         res_model="sale.order.line"
-        domain="[('tampered', '=', True), ('fake_field', '=', True)]"
         view_mode="tree,form"/>
   
-    <act_window id="fake_sales_order_action"
+    <!-- <act_window id="fake_sales_order_action"
         name="All Sales Order"
         res_model="sale.order"
         domain="['|',('active', '=', False),('fake_field', '=', False)]"
-        view_mode="tree,form"/>
+        view_mode="tree,form"/> -->
 
     <!-- <act_window id="stock_inventory_fake_action"
         name="Stock Order"

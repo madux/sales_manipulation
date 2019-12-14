@@ -90,7 +90,6 @@ class SaleOrdersLine(models.Model):
     stock_qty = fields.Float('Stock Remaining')
     cost_price = fields.Float('Cost Price', related="product_id.standard_price")
 
-    
     # @api.onchange('price_unit')
     # def check_validity(self):
     #     if self.price_unit:
@@ -251,30 +250,14 @@ class CommissionWizard(models.Model):
     def confirm_changes(self):
         percent_amount = 0
         value = 0
+        sale_list = []
         for order_line in self.sales_fake_line:
             if self.overall_operation == True:
                 order_line.update({'product_uom_qty': round(order_line.preview_new_qty)})
-                
-            sorted_item = [it for it, count in Counter(order_line).items() if count > 1]
-            for each in sorted_item:
-                sale_order = self.env['sale.order'].browse([each])
-                sale_name = str(sale_order.name)
-                partner = sale_order.partner_id.id
-                date = sale_order.date_order
-                narration = "SM"
-                amount = sale_order.amount_total
-                '''each sales append the order_id, pick the total amount and create move'''
-                self.Account_Move(sale_name, journal, date, narration, partner, amount)
-            order_line.push_change_account_move(order_line.order_id.name, order_line.order_id.amount_total, order_line.order_id.amount_total)           
 
-    def push_change_account_move(self, ref, credit, debit):
-        account_move = self.env['account.move.line']
-        so_moves = account_move.search([('ref', '=', ref)])
-        so_moves[0].debit = debit
-        so_moves.line_ids[1].credit = credit
-        
 
-class AcocuntPaymentFake(models.Model):
+
+class AccountPaymentFake(models.Model):
     _inherit = "account.payment"
 
     fake_field = fields.Boolean('Null', default=False)

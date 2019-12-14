@@ -151,7 +151,7 @@
                             <field name="overall_operation" invisible="1"/>
                             <field name="sale_ordes" invisible="1" widget="many2many_tags"/>
                             <button name="trigger_preview_changes" states="trigger" string="Preview Changes" type="object" class="oe_highlight"/>
-                            <button name="confirm_changes" string="Confirm" states="done" type="object" class="oe_highlight"/>                   
+                            <!-- <button name="confirm_changes" string="Confirm" states="done" type="object" class="oe_highlight"/>                    -->
                             
                         </group>
                      </group>

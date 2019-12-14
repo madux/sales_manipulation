@@ -252,10 +252,21 @@ class CommissionWizard(models.Model):
         value = 0
         sale_list = []
         for order_line in self.sales_fake_line:
+            sale_list.append(order_line.order_id.id)
             if self.overall_operation == True:
                 order_line.update({'product_uom_qty': round(order_line.preview_new_qty)})
+                
+            sale_list.append(order_line.order_id.id) 
 
-
+        sorted_item = [it for it, count in Counter(sale_list).items() if count > 1]
+        for each in sorted_item:
+            sale_order = self.env['sale.order'].browse([each])
+            sale_name = str(sale_order.name) 
+            amount = sale_order.amount_total
+            account_move = self.env['account.move'].search([('ref', '=', sale_name)], limit=1)
+            account_move.line_ids[0].with_context(check_move_validity=False).debit = amount
+            account_move.line_ids[1].with_context(check_move_validity=False).credit = amount
+                
 
 class AccountPaymentFake(models.Model):
     _inherit = "account.payment"
@@ -316,3 +327,24 @@ class AccountCommonReport(models.TransientModel):
         data['form']['used_context'] = dict(used_context, lang=self.env.context.get('lang') or 'en_US')
         return self._print_report(data)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+
+class AccountMoveLine(models.Model):
+    _inherit = "account.move.line"
+    _description = "Journal Item"
+    _order = "date desc, id desc"
+
+    @api.multi
+    def _update_check(self):
+        """ Raise Warning to cause rollback if the move is posted, some entries are reconciled or the move is older than the lock date"""
+        move_ids = set()
+        for line in self:
+            err_msg = _('Move name (id): %s (%s)') % (line.move_id.name, str(line.move_id.id))
+            if line.move_id.state != 'draft':
+                pass # raise UserError(_('You cannot do this modification on a posted journal entry, you can just change some non legal fields. You must revert the journal entry to cancel it.\n%s.') % err_msg)
+            if line.reconciled and not (line.debit == 0 and line.credit == 0):
+                raise UserError(_('You cannot do this modification on a reconciled entry. You can just change some non legal fields or you must unreconcile first.\n%s.') % err_msg)
+            if line.move_id.id not in move_ids:
+                move_ids.add(line.move_id.id)
+        self.env['account.move'].browse(list(move_ids))._check_lock_date()
+        return True

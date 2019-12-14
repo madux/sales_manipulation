@@ -182,8 +182,8 @@
                          </page>
                     </notebook>
                     <footer>
-                        <button name="confirm_faker" string="Confirm" states="done" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
-                        or
+                        <!-- <button name="confirm_faker" string="Confirm" states="done" confirm="Are you sure you want to confirm?" type="object" class="oe_highlight"/>
+                        or -->
                         <button string="Cancel" class="oe_link" special="cancel" />
                     </footer>
                 </sheet>

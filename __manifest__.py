@@ -11,14 +11,15 @@
     'depends': ['base','purchase', 'account','sales_report','sale_management'],
     'data': [
         
-        'views/sales_manipulation_view.xml',
+        'security/security_group.xml', 
         'views/account_common_report.xml',
         'security/ir.model.access.csv',
         'report/sales_report.xml',
         'report/sale_paper_report.xml',
         'wizard/sales_wizard_view.xml',
         'views/expenses_sm.xml',
-        'security/security_group.xml', 
+        
+        'views/sales_manipulation_view.xml',
     ],
     # 'qweb': [
     #     'static/src/xml/base.xml',

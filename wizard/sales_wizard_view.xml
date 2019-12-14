@@ -11,12 +11,12 @@
         			<field name="salesperson_id" /> 
         		</group>
 				<group col="4">
-        			<field name="date_from" />
-        			<field name="date_to" />
+        			<field name="date_start" />
+        			<field name="date_end" />
         		</group>
         		
         		<footer>
-	                <button name="check_report" string="Print" type="object" default_focus="1" class="oe_highlight" />
+	                <button name="get_report" string="Print" type="object" default_focus="1" class="oe_highlight" />
 	                or
 	                <button string="Cancel" class="oe_link" special="cancel" />
 	            </footer>

@@ -110,7 +110,80 @@
 				</t>
 			</t>
 		</template>
-        
+
+        <report id="recap_report_sales"
+            model="sale.order.line"
+            string="Sales Report"
+            report_type="qweb-pdf"
+            name="sales_manipulation.sales_manipulation_report_generated" 
+            file="sales_manipulation.sales_manipulation_report_generated"
+            menu="False"/>
+
+        <template id="sales_manipulation_report_generated">
+            <t t-call="web.html_container">
+                <div class="header" style="border-bottom: 2px solid black">
+                    <h3 class="text-center">Sales Report</h3>
+                    <h4 class="text-center">
+                        <strong>From</strong>:
+                        <t t-esc="date_start"/>
+                        <strong>To</strong>:
+                        <t t-esc="date_end"/>
+                    </h4>
+                </div>
+                <div class="article">
+                    <table class="table table-condensed table-bordered" style="width: 100%">
+                        <thead>
+                            <th class="text-center" style="width: 70%">Order No</th>
+                            <th class="text-center" style="width: 15%">Customer</th>
+                            <th class="text-center" style="width: 15%">Product</th>
+                            <th class="text-center" style="width: 70%">Qty</th>
+                            <th class="text-center" style="width: 15%">Unit Price</th>
+                            <th class="text-center" style="width: 15%">total</th> 
+                        </thead>
+                        <tbody> 
+                            <t t-foreach="docs" t-as="doc">
+                                <tr>
+                                    <td>
+                                        <span t-esc="doc['order_name']"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-esc="doc['partner']"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-esc="doc['product']"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-esc="doc['qty']"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-esc="doc['unit_price']"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-esc="doc['total']"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="footer">
+                    <div class="row text-center" style="border-top: 1px solid black;">
+                        <div class="col col-3 offset-9 text-right">
+                            <ul class="list-inline mt-2">
+                                <li class="list-inline-item">Page:</li>
+                                <li class="list-inline-item">
+                                    <span class="page"/>
+                                </li>
+                                <li class="list-inline-item">/</li>
+                                <li class="list-inline-item">
+                                    <span class="topage"/>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template> 
 	</data>
 </odoo>
 

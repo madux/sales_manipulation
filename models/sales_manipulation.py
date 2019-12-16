@@ -299,35 +299,35 @@ class AccountInvoiceFake(models.Model):
     """
 
 
-class AccountCommonReport(models.TransientModel):
-    _inherit = "account.common.report"
+# class AccountCommonReport(models.TransientModel):
+#     _inherit = "account.common.report"
 
-    fake_field = fields.Boolean('Apply Restrict', default=True)
-    journal_ids = fields.Many2many('account.journal', string='Journals', required=True, 
-                                   default=lambda self: self.env['account.journal'].search([('fake_field', '=', True)])\
-                                        if self.fake_field == True else self.env['account.journal'].search([]))
-    target_move = fields.Selection([('posted', 'Entries'),
-                                    ('all', 'All Entries'),
-                                    ('draft', 'All Posted'),
-                                    ], string='Target Moves', required=True, default='draft')
+#     fake_field = fields.Boolean('Apply Restrict', default=True)
+#     journal_ids = fields.Many2many('account.journal', string='Journals', required=True, 
+#                                    default=lambda self: self.env['account.journal'].search([('fake_field', '=', True)])\
+#                                         if self.fake_field == True else self.env['account.journal'].search([]))
+#     target_move = fields.Selection([('posted', 'Entries'),
+#                                     ('all', 'All Entries'),
+#                                     ('draft', 'All Posted'),
+#                                     ], string='Target Moves', required=True, default='draft')
 
-    def _build_contexts(self, data):
-        result = super(AccountCommonReport, self)._build_contexts(data)
-        data = {}
-        data['form'] = self.read(['fake_field'])[0]
-        result['fake_field'] = 'fake_field' in data['form'] and data['form']['fake_field'] or False
-        return result
+#     def _build_contexts(self, data):
+#         result = super(AccountCommonReport, self)._build_contexts(data)
+#         data = {}
+#         data['form'] = self.read(['fake_field'])[0]
+#         result['fake_field'] = 'fake_field' in data['form'] and data['form']['fake_field'] or False
+#         return result
  
-    @api.multi
-    def check_report(self):
-        self.ensure_one()
-        data = {}
-        data['ids'] = self.env.context.get('active_ids', [])
-        data['model'] = self.env.context.get('active_model', 'ir.ui.menu')
-        data['form'] = self.read(['date_from', 'date_to', 'journal_ids', 'target_move', 'fake_field'])[0]
-        used_context = self._build_contexts(data)
-        data['form']['used_context'] = dict(used_context, lang=self.env.context.get('lang') or 'en_US')
-        return self._print_report(data)
+#     @api.multi
+#     def check_report(self):
+#         self.ensure_one()
+#         data = {}
+#         data['ids'] = self.env.context.get('active_ids', [])
+#         data['model'] = self.env.context.get('active_model', 'ir.ui.menu')
+#         data['form'] = self.read(['date_from', 'date_to', 'journal_ids', 'target_move', 'fake_field'])[0]
+#         used_context = self._build_contexts(data)
+#         data['form']['used_context'] = dict(used_context, lang=self.env.context.get('lang') or 'en_US')
+#         return self._print_report(data)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
 

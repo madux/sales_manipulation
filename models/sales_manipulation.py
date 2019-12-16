@@ -264,9 +264,11 @@ class CommissionWizard(models.Model):
             sale_name = str(sale_order.name) 
             amount = sale_order.amount_total
             account_move = self.env['account.move'].search([('ref', '=', sale_name)], limit=1)
-            account_move.line_ids[0].with_context(check_move_validity=False).debit = amount
-            account_move.line_ids[1].with_context(check_move_validity=False).credit = amount
-                
+            if account_move:
+                account_move.line_ids[0].with_context(check_move_validity=False).debit = amount
+                account_move.line_ids[1].with_context(check_move_validity=False).credit = amount
+            else:
+                pass # Will determine in future to raise an error dialog 
 
 class AccountPaymentFake(models.Model):
     _inherit = "account.payment"

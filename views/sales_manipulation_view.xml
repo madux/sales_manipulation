@@ -30,6 +30,10 @@
                 <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
                     <field name="stock_qty"/>
                 </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+
+                </xpath>
                  <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="before">
                     <field name="cost_price" invisible="0"/>
                 </xpath>

@@ -8,11 +8,11 @@
     'category': 'Base',
     # 'live_test_url': "https://www.youtube.com/watch?v=KEjxieAoGeA&feature=youtu.be",
 
-    'depends': ['base','purchase', 'account','sales_report','sale_management'],
+    'depends': ['base','purchase','stock', 'account','sales_report','sale_management', 'om_account_accountant', 'l10n_uk'],
     'data': [
         
         'security/security_group.xml', 
-        'views/account_common_report.xml',
+        # 'views/account_common_report.xml',
         'security/ir.model.access.csv',
         'report/sales_report.xml',
         'report/sale_paper_report.xml',

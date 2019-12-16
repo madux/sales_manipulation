@@ -329,7 +329,7 @@ class AccountInvoiceFake(models.Model):
 class AccountCommonReport(models.TransientModel):
     _inherit = "account.common.report"
 
-    # fake_field = fields.Boolean('Apply Restrict', default=True)
+    fake_field = fields.Boolean('Apply Restrict', default=True)
     # journal_ids = fields.Many2many('account.journal', string='Journals', required=True) 
 #                                    default=lambda self: self.env['account.journal'].search([('fake_field', '=', True)])\
 #                                         if self.fake_field == True else self.env['account.journal'].search([]))

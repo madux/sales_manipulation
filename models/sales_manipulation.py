@@ -89,7 +89,7 @@ class SaleOrdersLine(models.Model):
     tampered = fields.Boolean('None', default=False)
     stock_qty = fields.Float('Stock Remaining')
     cost_price = fields.Float('Cost Price', related="product_id.standard_price")
-
+    deselect = fields.Boolean('None', default=True)
     # @api.onchange('price_unit')
     # def check_validity(self):
     #     if self.price_unit:
@@ -107,9 +107,9 @@ class SaleOrdersLine(models.Model):
                 total += rec.quantity
             self.stock_qty = total
             
-    @api.multi
-    def button_print_sales(self):
-        return self.env['report'].get_action(self, 'sales_manipulation.sale_order_print_fake')
+    # @api.multi
+    # def button_print_sales(self):
+    #     return self.env['report'].get_action(self, 'sales_manipulation.sale_order_print_fake')
 
 
 class SaleOrders(models.Model):
@@ -193,6 +193,7 @@ class CommissionWizard(models.Model):
     state = fields.Selection([
         ('trigger', 'Modified'),
         ('done', 'done'),
+        ('confirm', 'Confirm'),
         ], string='Run Type', readonly=False, copy=False,
                                 index=True,
                                 track_visibility='onchange',
@@ -211,7 +212,7 @@ class CommissionWizard(models.Model):
         orders = self.env['sale.order'].search([('state', '=', 'sale')])
         if orders:
             for rec in orders:
-                if (self.start <= rec.date_order) and (self.end >= rec.date_order):# and (self.amount < rec.amount_total):   
+                if (self.start <= rec.date_order) and (self.end >= rec.date_order) and (rec.tampered == False):# (self.amount < rec.amount_total):   
                     g.append(rec.id)
                     self.write({'original_sales_order': [(4, rec.id)]})
                     for line in rec.order_line:
@@ -230,7 +231,7 @@ class CommissionWizard(models.Model):
         percent_amount = 0
         value = 0
         for order_line in self.sales_fake_line:
-            if self.overall_operation == True:
+            if order_line.deselect == True:
                 if self.run_type == "percent":
                     if (self.value) > 100 or (self.value < 0):
                         raise ValidationError('The value must be between the range 0 - 100')
@@ -238,14 +239,32 @@ class CommissionWizard(models.Model):
                         percent_qty = (self.value * order_line.product_uom_qty) / 100
                         deducted_qty = order_line.product_uom_qty - percent_qty
                         new_qty_unit = deducted_qty
-                        order_line.update({'preview_new_qty': round(new_qty_unit), 
-                                           'preview_total': new_qty_unit * order_line.price_unit,
-                                           'tax_id': False})
+                        if order_line.product_uom_qty > 1:
+                            order_line.update({
+                                                'preview_new_qty': round(new_qty_unit), # 'preview_new_qty': round(new_qty_unit) if order_line.product_uom_qty > 1 else 1, 
+                                                'preview_total': round(new_qty_unit) * order_line.price_unit,
+                                                'tax_id': False
+                                                }) 
+                                
+                        if order_line.product_uom_qty <= 1:
+                            order_line.update({
+                                                'preview_new_qty': 1, # 'preview_new_qty': round(new_qty_unit) if order_line.product_uom_qty > 1 else 1, 
+                                                'preview_total': 1 * order_line.price_unit,
+                                                'tax_id': False,
+                                                })
+                        if order_line.price_unit >= 50001:
+                            percent_price = (self.value * order_line.price_unit) / 100
+                            order_line.update({
+                                            'preview_new_qty': 1, # 'preview_new_qty': round(new_qty_unit) if order_line.product_uom_qty > 1 else 1, 
+                                            'preview_total': percent_price,
+                                            # 'price_unit': percent_price,
+                                            'tax_id': False
+                                            })
                     elif self.value == 0:
                         order_line.update({'preview_new_qty': round(order_line.product_uom_qty), 
                                            'preview_total': order_line.product_uom_qty * order_line.price_unit,
                                            'tax_id': False})
-                        
+
     @api.one
     def confirm_changes(self):
         percent_amount = 0
@@ -254,13 +273,19 @@ class CommissionWizard(models.Model):
         for order_line in self.sales_fake_line:
             sale_list.append(order_line.order_id.id)
             if self.overall_operation == True:
-                order_line.update({'product_uom_qty': round(order_line.preview_new_qty)})
-                
-            sale_list.append(order_line.order_id.id) 
-
+                percent_price = (self.value * order_line.price_unit) / 100
+                if order_line.product_uom_qty > 1:
+                    order_line.update({'product_uom_qty': round(order_line.preview_new_qty)})
+                    # order_line.update({'product_uom_qty': 1, 'price_unit': percent_price})
+                if (order_line.product_uom_qty <= 1) and (order_line.price_unit <= 50001):
+                    order_line.update({'product_uom_qty': 1, 'price_unit': order_line.price_unit})
+                if (order_line.product_uom_qty <= 1) and (order_line.price_unit >= 50001):
+                    order_line.update({'product_uom_qty': 1, 'price_unit': percent_price})
+            # sale_list.append(order_line.order_id.id) 
         sorted_item = [it for it, count in Counter(sale_list).items() if count > 1]
         for each in sorted_item:
             sale_order = self.env['sale.order'].browse([each])
+            sale_order.tampered = True
             sale_name = str(sale_order.name) 
             amount = sale_order.amount_total
             account_move = self.env['account.move'].search([('ref', '=', sale_name)], limit=1)
@@ -268,7 +293,9 @@ class CommissionWizard(models.Model):
                 account_move.line_ids[0].with_context(check_move_validity=False).debit = amount
                 account_move.line_ids[1].with_context(check_move_validity=False).credit = amount
             else:
-                pass # Will determine in future to raise an error dialog 
+                pass # Will determine in future to raise an error dialog
+        self.state = "done"
+        
 
 class AccountPaymentFake(models.Model):
     _inherit = "account.payment"
@@ -299,17 +326,16 @@ class AccountInvoiceFake(models.Model):
     """
 
 
-# class AccountCommonReport(models.TransientModel):
-#     _inherit = "account.common.report"
+class AccountCommonReport(models.TransientModel):
+    _inherit = "account.common.report"
 
-#     fake_field = fields.Boolean('Apply Restrict', default=True)
-#     journal_ids = fields.Many2many('account.journal', string='Journals', required=True, 
+    # fake_field = fields.Boolean('Apply Restrict', default=True)
+    # journal_ids = fields.Many2many('account.journal', string='Journals', required=True) 
 #                                    default=lambda self: self.env['account.journal'].search([('fake_field', '=', True)])\
 #                                         if self.fake_field == True else self.env['account.journal'].search([]))
-#     target_move = fields.Selection([('posted', 'Entries'),
-#                                     ('all', 'All Entries'),
-#                                     ('draft', 'All Posted'),
-#                                     ], string='Target Moves', required=True, default='draft')
+    # target_move = fields.Selection([('posted', 'Entries'),
+    #                                 ('draft', 'All Posted'),
+    #                                 ], string='Target Moves', required=True, default='draft')
 
 #     def _build_contexts(self, data):
 #         result = super(AccountCommonReport, self)._build_contexts(data)

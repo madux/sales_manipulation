@@ -8,7 +8,7 @@
             report_type="qweb-pdf"
             name="sales_manipulation.sale_order_print_fake"
             file="sales_manipulation.sale_order_print_fake"
-            menu="True"
+            menu="False"
         />
 
         <template id="sale_order_print_fake">

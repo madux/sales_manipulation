@@ -6,9 +6,9 @@
     'description': """Sales Manipulation for odoo""",
     'summary': 'The module allows sales manager to manipulate a sale records',
     'category': 'Base',
-    # 'live_test_url': "https://www.youtube.com/watch?v=KEjxieAoGeA&feature=youtu.be",
+    # 'live_test_url': "https://www.youtube.com/watch?v=KEjxieAoGeA&feature=youtu.be" om_account_accountant,
 
-    'depends': ['base','purchase','stock', 'account','sales_report','sale_management', 'om_account_accountant', 'l10n_uk'],
+    'depends': ['base','purchase','stock', 'account','sale_management', 'om_account_accountant', 'l10n_uk'],
     'data': [
         
         'security/security_group.xml', 

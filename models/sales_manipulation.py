@@ -138,11 +138,8 @@ class SaleOrders(models.Model):
     @api.multi
     def action_confirm(self):
         res = super(SaleOrders, self).action_confirm()
-        # self.action_view_delivery()
-        # stock_picking = self.env['stock.picking'].search([('origin','=', self.name)], limit=1)
-        # if stock_picking:
-        #     stock_picking.do_new_transfer()
-        self.Account_Move()
+        # self.Account_Move()
+        self.create_invoice_bill()
         return res
 
     # @api.multi
@@ -150,8 +147,46 @@ class SaleOrders(models.Model):
     #     # return self.env['report'].get_action(self, 'sales_manipulation.report_print_sale_order_sm')
     #     return self.env.ref('sales_manipulation.report_print_sale_order_sm').get_action(self)
 
-    def Account_Move(self):
-        journal = self.env['account.journal'].search([('type', 'in', ['sale'])], limit=1)
+    def define_package_invoice_line(self,invoice): 
+        invoice_line_obj = self.env["account.invoice.line"]
+     
+        inv_id = invoice.id
+        for inv_line in self.order_line:
+            curr_invoice_pack = {
+                            'product_id': inv_line.product_id.id,
+                            'name': "For "+ str(inv_line.name),
+                            'price_unit': inv_line.price_unit, 
+                            'quantity': inv_line.product_uom_qty,
+                            'account_id': inv_line.product_id.categ_id.property_account_income_categ_id.id,
+                            'invoice_id': inv_id,
+                                }
+            invoice_line_obj.create(curr_invoice_pack) 
+  
+    def create_invoice_bill(self):
+        
+        """ Create Customer Invoice for members.
+        """
+         
+        invoice_line_obj = self.env["account.invoice.line"]
+        invoice_obj = self.env["account.invoice"] 
+         
+        invoice = invoice_obj.create({
+            'partner_id': self.partner_id.id,
+            'account_id': self.partner_id.property_account_receivable_id.id,
+            'fiscal_position_id': self.partner_id.property_account_position_id.id, 
+            'date_invoice': fields.Date.today(),
+            'origin': self.name,
+            'type': 'out_invoice', # customer
+            # 'type': 'in_invoice', # vendor
+        }) 
+            
+        self.define_package_invoice_line(invoice)
+        invoice.action_invoice_open()
+        self.Account_Move(invoice)
+
+    def Account_Move(self, invoice):
+        
+        journal = self.env['account.journal'].search([('type', 'in', ['bank'])], limit=1)
         acm = self.env['account.payment.method'].create(
                 {'payment_type': 'inbound', 'name': 'Payment For '+self.name, 'code': str(self.name) + str(self.id)})
         payment_data = {
@@ -163,7 +198,8 @@ class SaleOrders(models.Model):
             'journal_id': journal.id,  
             'narration': "SO - For" + self.name,
             'communication': str(self.name), 
-            'payment_method_id': acm.id, 
+            'payment_method_id': acm.id,
+            'invoice_ids': [(4, invoice.id)],
                         }
         payment_model = self.env['account.payment'].create(payment_data).post()
 

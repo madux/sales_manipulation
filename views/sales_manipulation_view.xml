@@ -147,14 +147,14 @@
                         <group>
                             <field name="start"/>
                             <field name="end"/>
-                            <field name="amount"/>                   
+                            <field name="amount" invisible="1"/>                   
                         </group>
                         <group>                  
                             <field name="run_type" readonly="1"/>
                             <field name="value" string="Percentage value" placeholder="eg. 5%" required="1"/> 
                             <field name="overall_operation" invisible="1"/>
                             <field name="sale_ordes" invisible="1" widget="many2many_tags"/>
-                            <button name="trigger_preview_changes" states="trigger" string="Preview Changes" type="object" class="oe_highlight"/>
+                            <button name="trigger_preview_changes" string="Preview Changes" states="trigger" type="object" class="oe_highlight"/>
                             <!-- <button name="confirm_changes" string="Confirm" states="done" type="object" class="oe_highlight"/>                    -->
                             
                         </group>
@@ -171,15 +171,16 @@
                             </field>
                             <separator string="Sales Records" colspan="4"/>
                             <field name="sales_fake_line" readonly="0">
-                              <tree string="Manipulated Sales Order" editable="bottom">
+                              <tree string="Manipulated Sales Order" delete="0" editable="bottom">
                                 <field name="order_id" readonly="1"/>
                                 <field name="product_id" readonly="1"/> 
-                                 <field name="product_uom_qty" readonly="0"/>
-                                 <field name="preview_new_qty" readonly="0"/>
-                                  <field name="preview_total" readonly="0"/>
-                                 <field name="tax_id" readonly="0" widget="many2many_tags"/>
-                                <field name="price_unit" readonly="0"/>
+                                 <field name="product_uom_qty" readonly="1"/>
+                                 <field name="preview_new_qty" />
+                                  <field name="preview_total"/>
+                                 <!-- <field name="tax_id" readonly="1" widget="many2many_tags"/> -->
+                                <field name="price_unit" readonly="1"/>
                                 <field name="price_total" readonly="1"/>
+                                <field name="deselect"/>
                                 
                               </tree>
                             </field>
@@ -223,6 +224,7 @@
                             <field name="price_tax"/> 
                             <field name="price_subtotal"/>
                             <field name="price_total"/>
+                            
                             <field name="active"/> 
                         </group>
                      </group>
@@ -258,18 +260,6 @@
         name="Sales"
         res_model="sale.order.line"
         view_mode="tree,form"/>
-  
-    <!-- <act_window id="fake_sales_order_action"
-        name="All Sales Order"
-        res_model="sale.order"
-        domain="['|',('active', '=', False),('fake_field', '=', False)]"
-        view_mode="tree,form"/> -->
-
-    <!-- <act_window id="stock_inventory_fake_action"
-        name="Stock Order"
-        res_model="product.product"
-        view_id="stock.view_stock_product_tree"
-        view_mode="tree,form"/> -->
 
         <act_window id="stock_product_fake_action"
         name="Stock Quantity"
@@ -285,8 +275,6 @@
     <menuitem id ="menu_sales_line_faker" name="Sales Lines" parent="sale.sale_order_menu" 
         action="fake_sales_line_action" sequence="11" groups="sales_manipulation.sales_fake_officer,sales_manipulation.sales_fake_tax_officer,base.group_system,sales_manipulation.sales_fake_user"/>
 
-    <!-- <menuitem id ="menu_sales_order_faker" name="All Sales Orders" parent="sale.sale_order_menu" 
-        action="fake_sales_order_action" sequence="13" groups="sales_manipulation.sales_fake_officer"/> -->
     
     <menuitem action="sale.action_orders"
             id="sale.menu_sale_order" name = "Sales Orders" parent="sale.sale_menu_root"
@@ -297,40 +285,6 @@
     <menuitem id="view_stocks_quantity_manipulation"
                 action="stock_product_fake_action" name="Stock Quantity" parent="sale.sale_menu_root"
                 sequence="2"/>
-
-    <!-- <menuitem id="sale_fake_id_inventory"
-                action="stock_inventory_fake_action" name = "Product Quantites" parent="sale.menu_report_product_all"
-                sequence="7"/> -->
-    <menuitem id="sale_fakers_report" name="Print Sales Orders" action="sales_report.action_salesperson_wizard" 
-    parent="sale.menu_report_product_all" sequence="10"/>
-
-
-    <!-- <menuitem id="stock_fake_id_inventory2"
-                action="stock_inventory_fake_action" name = "Product Quantites" parent="stock.menu_warehouse_report"
-                sequence="7"/> -->
-
-
-
-
-
-
-
-
-
-
-    <!-- <menuitem action="fake_sales_order_action"
-            id="menu_fake_sale_order" name="All Orders" parent="sales_team.menu_sales"
-            sequence="12" groups="base.group_system,sales_manipulation.sales_fake_officer"/> -->
-
-    <!--Menu to display to all people (Fake, tampered records to display)-->
-    <!-- <menuitem action="action_orders2"
-            id="menu_sale_order" 
-            parent="sales_team.menu_sales"
-            sequence="13" 
-            groups="sales_manipulation.sales_fake_auditor_user,
-            sales_manipulation.sales_fake_user,
-            sales_manipulation.sales_fake_tax_officer,
-            base.group_system"/> -->
 
         <record id="action_orders2" model="ir.actions.act_window">
             <field name="name">All Sales Orders</field>
@@ -351,32 +305,6 @@
                 </p>
             </field>
         </record>
-    <!-- <record id="fake_action_orders" model="ir.actions.act_window">
-            <field name="name">Sales Orders</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">sale.order</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
-            <field name="search_view_id" ref="sale_order_view_search_inherit_sale"/>
-            <field name="context">{}</field>
-            <field name="domain">[('active', '=', True)]</field>
-            <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
-                    Create a Quotation, the first step of a new sale.
-                </p><p>
-                    Once the quotation is confirmed, it becomes a sales order.
-                    You'll be able to invoice it and collect payments.
-                    From the <i>Sales Orders</i> menu, you can track delivery
-                    orders or services.
-                </p>
-            </field>
-        </record> -->
-        
-        <!-- <menuitem action="sale.action_orders"
-            id="sale.menu_sale_order" name="Sales Orders" parent="sale.sales_team.menu_sales"
-            sequence="12" groups="sales_manipulation.sales_fake_officer, base.group_system"/>
-
-            <menuitem id ="fake_sales_menu" name="Sales Orders .." parent="sale.sales_team.menu_sales" action="fake_action_orders" 
-            sequence="13" groups="sales_manipulation.sales_fake_user"/> --> 
+    
     </data>
  </odoo>

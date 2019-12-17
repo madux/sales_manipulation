@@ -11,7 +11,8 @@
         <record id="sales_fake_officer" model="res.groups">
             <field name="name">Manager</field>
             <field name="category_id" ref="category_fake_sales_group"/>
-             <!-- <field name="users" eval="[(4, ref('base.group_user'))]"/> -->
+             <field name="users" eval="[(4, ref('base.group_system'))]"/>
+             <field name="implied_ids" eval="[(4, ref('base.group_system'))]"/>
         </record>
 
         <record id="sales_fake_user" model="res.groups">

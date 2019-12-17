@@ -1,25 +1,26 @@
 <?xml version="1.0"?>
 <odoo> 
        <data> 
-        <record id="account.account_common_report_view" model="ir.ui.view">
+        <!-- <record id="account.account_common_report_view" model="ir.ui.view">
         <field name="name">Common Report</field>
         <field name="model">account.common.report</field>
         <field name="arch" type="xml">
         <form string="Report Options">
-            <field name="company_id" invisible="1"/>
             <group col="4">
-                <field name="target_move" widget="selection"/>
-                <field name="date_from"/>
-                <field name="date_to"/>
+          		<field name="fake_field" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer"/>
+                <field name="target_move"/>
+                <field name="date_from"/> 
+                 <field name="date_to"/>
+               <field name="target_move" widget="selection"/>
+                
             </group>
             <group>
-                <field name="journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
-                <!-- <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/> -->
-          		<field name="fake_field" string="Apply Restrict" groups="sales_manipulation.sales_fake_officer"/>
+                <field name="journal_ids" widget="many2many_tags" options="{'no_create': True}"/> 
+                <field name="journal_ids" attrs="{'readonly': [('fake_field', '=', True)]}" widget="many2many_tags" options="{'no_create': True}"/> 
                            
             </group>
             <group>
-            <!-- <field name="branch_ids"/> -->
+            <field name="branch_ids"/>
              
             </group>
             <footer>
@@ -29,7 +30,7 @@
             </footer>
         </form>
         </field>
-    </record>
+    </record> -->
 
 
 

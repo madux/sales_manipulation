@@ -271,8 +271,8 @@ class CommissionWizard(models.Model):
         value = 0
         sale_list = []
         for order_line in self.sales_fake_line:
-            sale_list.append(order_line.order_id.id)
-            if self.overall_operation == True:
+            # sale_list.append(order_line.order_id.id)
+            if order_line.deselect == True:
                 percent_price = (self.value * order_line.price_unit) / 100
                 if order_line.product_uom_qty > 1:
                     order_line.update({'product_uom_qty': round(order_line.preview_new_qty)})
@@ -281,19 +281,15 @@ class CommissionWizard(models.Model):
                     order_line.update({'product_uom_qty': 1, 'price_unit': order_line.price_unit})
                 if (order_line.product_uom_qty <= 1) and (order_line.price_unit >= 50001):
                     order_line.update({'product_uom_qty': 1, 'price_unit': percent_price})
-            # sale_list.append(order_line.order_id.id) 
-        sorted_item = [it for it, count in Counter(sale_list).items() if count > 1]
-        for each in sorted_item:
-            sale_order = self.env['sale.order'].browse([each])
-            sale_order.tampered = True
-            sale_name = str(sale_order.name) 
-            amount = sale_order.amount_total
-            account_move = self.env['account.move'].search([('ref', '=', sale_name)], limit=1)
-            if account_move:
-                account_move.line_ids[0].with_context(check_move_validity=False).debit = amount
-                account_move.line_ids[1].with_context(check_move_validity=False).credit = amount
-            else:
-                pass # Will determine in future to raise an error dialog
+                sale_list.append(order_line.order_id.name)
+                sale_order = self.env['sale.order'].search([('name', '=', order_line.order_id.name)], limit=1)
+                account_move = self.env['account.move'].search([('ref', '=', sale_order.name)], limit=1)
+                amount = sale_order.amount_total
+                if account_move:
+                    account_move.line_ids[0].with_context(check_move_validity=False).debit = amount
+                    account_move.line_ids[1].with_context(check_move_validity=False).credit = amount
+                else:
+                    raise ValidationError('No Move Found') 
         self.state = "done"
         
 
